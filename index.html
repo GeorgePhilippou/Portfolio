@@ -169,7 +169,22 @@ fetch("https://georgephilippou.github.io/booklet-pdf/latest.json").then(r=>r.ok?
  document.querySelectorAll(".card").forEach(c=>{if(c.querySelector("h3").textContent==="HAL"){const im=c.querySelector("img");im.style.cursor="pointer";im.title="";im.addEventListener("click",openHal)}});
  const seq=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];let ki=0,typed="";
  // Radiohead easter egg: footer line or typing the name scrambles the cards, then puts everything back in its right place
- const rightPlace=()=>{const cs=[...document.querySelectorAll(".card")];cs.forEach(c=>{const x=(Math.random()-.5)*260,y=(Math.random()-.5)*220,r=(Math.random()-.5)*34;
+ // original synthesised sound for the Radiohead egg: a tense, glitchy cluster while the cards scatter, then a warm chord as they settle
+ const buildRP=(ctx,dest,t0)=>{
+  const master=ctx.createGain();master.gain.value=.5;master.connect(dest);
+  const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.Q.value=4;lp.frequency.setValueAtTime(300,t0);lp.frequency.exponentialRampToValueAtTime(2600,t0+2.2);lp.frequency.exponentialRampToValueAtTime(900,t0+6);lp.connect(master);
+  const voice=(f,type,start,dur,peak,attack,detune=0)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;o.detune.value=detune;o.connect(g);g.connect(lp);
+   g.gain.setValueAtTime(.0001,t0+start);g.gain.exponentialRampToValueAtTime(peak,t0+start+attack);g.gain.exponentialRampToValueAtTime(.0001,t0+start+dur);o.start(t0+start);o.stop(t0+start+dur+.05)};
+  // tense cluster, slightly detuned
+  [[185,0],[196,9],[233.1,-7],[277.2,5]].forEach(([f,d])=>voice(f,"triangle",0,2.6,.16,1.6,d));
+  // glitch blips
+  for(let i=0;i<16;i++){const st=.15+i*.135+Math.random()*.06,f=400+Math.random()*1800;voice(f,"square",st,.05,.05,.004)}
+  // warm resolving chord (Cmaj9-ish)
+  [[130.8,0],[196,3],[246.9,-3],[329.6,2],[587.3,0]].forEach(([f,d],i)=>voice(f,"sine",2.3,3.7,.17-i*.015,.7,d));
+ };
+ window.__buildRP=buildRP;
+ let sfx=null;const rpSound=()=>{try{sfx=sfx||new(window.AudioContext||window.webkitAudioContext)();if(sfx.state==="suspended")sfx.resume();buildRP(sfx,sfx.destination,sfx.currentTime+.02)}catch(e){}};
+ const rightPlace=()=>{rpSound();const cs=[...document.querySelectorAll(".card")];cs.forEach(c=>{const x=(Math.random()-.5)*260,y=(Math.random()-.5)*220,r=(Math.random()-.5)*34;
    c.animate([{transform:"none"},{transform:`translate(${x}px,${y}px) rotate(${r}deg)`,offset:.3},{transform:`translate(${x}px,${y}px) rotate(${r}deg)`,offset:.6},{transform:"none"}],{duration:3200,easing:"cubic-bezier(.6,0,.2,1)"})});
    toast("Everything in its right place.")};
  $("egg").onclick=rightPlace;$("egg").onkeydown=e=>{if(e.key==="Enter"||e.key===" ")rightPlace()};
