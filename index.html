@@ -6,23 +6,24 @@
 <title>George Philippou — Projects Built with AI</title>
 <meta name="description" content="A portfolio of educational sites, games, tools and websites built with Claude and ChatGPT.">
 <style>
-:root{--bg:#faf8f4;--card:#fff;--ink:#1f1d1a;--muted:#6d685f;--line:#e8e3d9;--accent:#b8532f;--chip:#f2eee6;--shadow:0 1px 2px rgba(40,30,10,.05),0 8px 24px rgba(40,30,10,.06)}
-@media (prefers-color-scheme:dark){:root{--bg:#131312;--card:#1c1b19;--ink:#f2efe9;--muted:#a29d92;--line:#2d2b27;--accent:#e58f6b;--chip:#272522;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
+:root{--bg:#f6f5ea;--card:#fdfdf8;--ink:#1e2213;--muted:#62664f;--line:#dedcc6;--accent:#5a6a1f;--hero:#63722b;--hero-ink:#f6f5e6;--hero-mut:#d8dcb8;--chip:#ebeadb;--shadow:0 1px 2px rgba(50,60,20,.06),0 8px 24px rgba(50,60,20,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#b7c66a;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
 a{color:inherit}
 .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
-.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{position:sticky;top:0;z-index:5;background:var(--hero);color:var(--hero-ink);border-bottom:1px solid rgba(255,255,255,.14)}
 .bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:56px}
 .bar b{font:600 16px Georgia,serif}
 .bar nav{display:flex;gap:4px;flex-wrap:wrap}
-.bar nav a{text-decoration:none;font-size:14px;color:var(--muted);padding:6px 12px;border-radius:999px}
-.bar nav a:hover{background:var(--chip);color:var(--ink)}
-header{padding:72px 0 40px}
-header .eyebrow{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.bar nav a{text-decoration:none;font-size:14px;color:var(--hero-mut);padding:6px 12px;border-radius:999px}
+.bar nav a:hover{background:rgba(255,255,255,.12);color:var(--hero-ink)}
+.hero{background:var(--hero);color:var(--hero-ink)}
+header{padding:72px 0 64px}
+header .eyebrow{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-mut);font-weight:600}
 h1{font:600 clamp(36px,5.5vw,60px)/1.08 Georgia,"Source Serif 4",serif;margin:0 0 20px;letter-spacing:-.01em}
-header p.lede{margin:0;max-width:600px;font-size:19px;color:var(--muted)}
+header p.lede{margin:0;max-width:600px;font-size:19px;color:var(--hero-mut)}
 section{padding:40px 0 16px}
 .head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
 .head h2{font:600 28px Georgia,serif;margin:0}
@@ -53,13 +54,14 @@ footer a{color:var(--accent);font-weight:600;text-decoration:none}
 <body>
 <div class="bar"><div class="wrap"><b>George Philippou</b>
 <nav><a href="#learn">Learning</a><a href="#games">Games</a><a href="#tools">Tools</a><a href="#business">Websites</a><a href="#about">About</a></nav></div></div>
-<div class="wrap">
+<div class="hero"><div class="wrap">
 <header>
   <p class="eyebrow">Portfolio</p>
   <h1>Things I've built with AI</h1>
   <p class="lede">Every project here was built in collaboration with Claude and ChatGPT. I set the direction, check the facts and test the results.</p>
 </header>
-<div id="root"></div>
+</div></div>
+<div class="wrap"><div id="root"></div>
 </div>
 <footer id="about"><div class="wrap"><p>I'm George Philippou. I use AI to build the projects on this page, choosing what gets built, checking the facts, testing the results and fixing what breaks.</p><p style="margin-top:14px"><a href="https://github.com/GeorgePhilippou">GitHub profile ↗</a></p></div></footer>
 <script>
