@@ -6,8 +6,8 @@
 <title>George Philippou — Projects Built with AI</title>
 <meta name="description" content="A portfolio of educational sites, games, tools and websites built with Claude and ChatGPT.">
 <style>
-:root{--bg:#f6f5ea;--card:#fdfdf8;--ink:#1e2213;--muted:#62664f;--line:#dedcc6;--accent:#5a6a1f;--hero:#63722b;--hero-ink:#f6f5e6;--hero-mut:#d8dcb8;--chip:#ebeadb;--shadow:0 1px 2px rgba(50,60,20,.06),0 8px 24px rgba(50,60,20,.08)}
-@media (prefers-color-scheme:dark){:root{--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#b7c66a;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}}
+:root{--bg:#f6f5ea;--card:#ffffff;--ink:#1e2213;--muted:#62664f;--line:#dedcc6;--accent:#c2571f;--hero:#63722b;--hero-ink:#f6f5e6;--hero-mut:#d8dcb8;--hero-accent:#f6b27c;--chip:#ebeadb;--shadow:0 1px 2px rgba(50,60,20,.06),0 8px 24px rgba(50,60,20,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#f0935f;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--hero-accent:#f0935f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
@@ -18,15 +18,15 @@ a{color:inherit}
 .bar b{font:600 16px Georgia,serif}
 .bar nav{display:flex;gap:4px;flex-wrap:wrap}
 .bar nav a{text-decoration:none;font-size:14px;color:var(--hero-mut);padding:6px 12px;border-radius:999px}
-.bar nav a:hover{background:rgba(255,255,255,.12);color:var(--hero-ink)}
+.bar nav a:hover{background:#fff;color:var(--hero)}
 .hero{background:var(--hero);color:var(--hero-ink)}
 header{padding:72px 0 64px}
-header .eyebrow{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-mut);font-weight:600}
+header .eyebrow{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-accent);font-weight:600}
 h1{font:600 clamp(36px,5.5vw,60px)/1.08 Georgia,"Source Serif 4",serif;margin:0 0 20px;letter-spacing:-.01em}
 header p.lede{margin:0;max-width:600px;font-size:19px;color:var(--hero-mut)}
 section{padding:40px 0 16px}
 .head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
-.head h2{font:600 28px Georgia,serif;margin:0}
+.head h2{font:600 28px Georgia,serif;margin:0;padding-bottom:8px;border-bottom:3px solid var(--accent)}
 .head .n{font-size:13px;color:var(--muted)}
 section>p.sub{margin:0 0 28px;color:var(--muted);max-width:640px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
