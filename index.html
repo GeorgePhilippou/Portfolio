@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>George Philippou — Projects Built with AI</title>
+<meta name="description" content="A portfolio of educational sites, games, tools, websites and firmware built with AI.">
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--ink:#1c1b19;--muted:#6b675f;--line:#e6e2d9;--accent:#b8532f;--chip:#f1ede4}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1d1b;--ink:#f1eee8;--muted:#a09b90;--line:#2e2c28;--accent:#e08a66;--chip:#2a2825}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{padding:72px 0 32px}
+header p.eyebrow{margin:0 0 8px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font:600 clamp(32px,6vw,52px)/1.1 Georgia,"Source Serif 4",serif;margin:0 0 16px}
+header p.lede{max-width:640px;color:var(--muted);font-size:18px;margin:0}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 0}
+nav a{text-decoration:none;font-size:14px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+nav a:hover{border-color:var(--accent);color:var(--accent)}
+section{padding:40px 0 8px}
+section h2{font:600 26px Georgia,serif;margin:0 0 4px}
+section>p.sub{margin:0 0 20px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card img,.card .ph{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block;border-bottom:1px solid var(--line)}
+.ph{display:flex;align-items:center;justify-content:center;background:var(--chip);color:var(--muted);font-size:14px;text-align:center;padding:16px}
+.body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.body h3{margin:0;font-size:19px}
+.body p{margin:0;color:var(--muted);font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:4px}
+.tags span{font-size:12px;background:var(--chip);border-radius:6px;padding:2px 8px;color:var(--muted)}
+.links{display:flex;gap:14px;font-size:14px;font-weight:600}
+.links a{color:var(--accent);text-decoration:none}
+.links a:hover{text-decoration:underline}
+.note{font-size:13px;color:var(--muted);font-style:italic}
+footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="eyebrow">George Philippou</p>
+  <h1>Things I've built with AI</h1>
+  <p class="lede">Reference sites, games, tools, websites and embedded firmware, made in collaboration with Claude. I set the direction, check the facts and test the results.</p>
+  <nav>
+    <a href="#learn">Learning &amp; reference</a>
+    <a href="#games">Games</a>
+    <a href="#tools">Everyday tools</a>
+    <a href="#business">Business websites</a>
+    <a href="#hardware">Hardware &amp; firmware</a>
+  </nav>
+</header>
+
+<section id="learn">
+  <h2>Learning &amp; reference</h2>
+  <p class="sub">Carefully sourced material on the ancient world, deep time and engineering.</p>
+  <div class="grid">
+    <article class="card">
+      <img src="img/hellenika.jpg" alt="Hellenika home page" loading="lazy">
+      <div class="body">
+        <h3>Hellenika</h3>
+        <p>An interactive atlas of the Ancient Greek world, 3200–30 BC. 400+ connected entities on a timeline and map, with guided journeys. Every claim is tagged with the kind of evidence behind it and how confident we can be.</p>
+        <div class="tags"><span>Vanilla JS</span><span>PWA</span><span>Canvas maps</span></div>
+        <div class="links"><a href="https://georgephilippou.github.io/Hellenika/">Open</a><a href="https://github.com/GeorgePhilippou/Hellenika">Code</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <img src="img/dinosauria.jpg" alt="Dinosauria home page" loading="lazy">
+      <div class="body">
+        <h3>Dinosauria</h3>
+        <p>An open scientific reference wiki with 328 dinosaur and early-bird profiles, combining the Natural History Museum's Dino Directory, the Paleobiology Database and the published literature.</p>
+        <div class="tags"><span>JavaScript</span><span>Open data</span><span>Scientific review</span></div>
+        <div class="links"><a href="https://georgephilippou.github.io/Dinosauria/">Open</a><a href="https://github.com/GeorgePhilippou/Dinosauria">Code</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="ph">How do we know humans evolved?<br>64-page A5 booklet</div>
+      <div class="body">
+        <h3>Human Evolution Booklet</h3>
+        <p>A 64-page illustrated booklet on the evidence for human evolution. Built with a Python and HTML pipeline, with an automatic layout checker and every new fact verified against DOIs.</p>
+        <div class="tags"><span>Python</span><span>Typesetting</span><span>Custom figures</span></div>
+        <p class="note">Print project, not online.</p>
+      </div>
+    </article>
+    <article class="card">
+      <div class="ph">Signals &amp; Systems<br>Interactive Laboratory</div>
+      <div class="body">
+        <h3>Signals &amp; Systems Lab</h3>
+        <p>A local-first teaching tool that links the maths, plots and physical intuition for signals and systems, with an accessible data table behind every plot.</p>
+        <div class="tags"><span>TypeScript</span><span>Education</span><span>Accessibility</span></div>
+        <p class="note">In development.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="games">
+  <h2>Games</h2>
+  <p class="sub">Playable in the browser, and designed for iPad and Apple Pencil.</p>
+  <div class="grid">
+    <article class="card">
+      <img src="img/dots.jpg" alt="Dots and Boxes start screen" loading="lazy">
+      <div class="body">
+        <h3>Dots &amp; Boxes</h3>
+        <p>The classic pen-and-paper game, designed for Apple Pencil. Play two players, against the computer, or across two iPads online.</p>
+        <div class="tags"><span>PWA</span><span>Firebase</span><span>Online multiplayer</span></div>
+        <div class="links"><a href="https://georgephilippou.github.io/dots-and-boxes/">Play</a><a href="https://github.com/GeorgePhilippou/dots-and-boxes">Code</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <img src="img/mosaic.jpg" alt="Mosaic Mates menu" loading="lazy">
+      <div class="body">
+        <h3>Mosaic Mates</h3>
+        <p>An original block-placement puzzle for two. Solo, shared-board and score-race modes, with private online rooms and drag-and-drop play.</p>
+        <div class="tags"><span>PWA</span><span>Firebase</span><span>Real-time sync</span></div>
+        <div class="links"><a href="https://georgephilippou.github.io/mosaic-mates/">Play</a><a href="https://github.com/GeorgePhilippou/mosaic-mates">Code</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="ph">George in WegTown II</div>
+      <div class="body">
+        <h3>George in WegTown II</h3>
+        <p>A 2D arcade game: dodge your enemies, collect your friends, and survive with three lives. Has a two-player mode, custom character art and a quip for every pickup.</p>
+        <div class="tags"><span>HTML5 canvas</span><span>Swift Mac app</span><span>Two-player</span></div>
+        <p class="note">Private for now, since it uses friends' likenesses.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="tools">
+  <h2>Everyday tools</h2>
+  <p class="sub">Apps built to solve a real problem for me and the people around me.</p>
+  <div class="grid">
+    <article class="card">
+      <img src="img/tripmap.jpg" alt="TripMap" loading="lazy">
+      <div class="body">
+        <h3>TripMap</h3>
+        <p>A mobile-first trip planner. Collect places on a map, build day-by-day itineraries and plan together with another traveller in real time. Works offline.</p>
+        <div class="tags"><span>Leaflet</span><span>PWA</span><span>Firebase</span></div>
+        <div class="links"><a href="https://georgephilippou.github.io/TripMap/">Open</a><a href="https://github.com/GeorgePhilippou/TripMap">Code</a></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="business">
+  <h2>Business websites</h2>
+  <p class="sub">Real sites for a local business, with no build step and free hosting.</p>
+  <div class="grid">
+    <article class="card">
+      <img src="img/fd-emba.jpg" alt="The Flying Dragon Thai and Chinese Takeaway" loading="lazy">
+      <div class="body">
+        <h3>The Flying Dragon — Thai &amp; Chinese Takeaway</h3>
+        <p>Website for the Thai and Chinese takeaway in Chlorakas, Paphos.</p>
+        <div class="tags"><span>Static site</span><span>GitHub Pages</span></div>
+        <div class="links"><a href="https://theflyingdragonpaphos.github.io/FlyingDragonEmba/">Visit</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <img src="img/fd-tomb.jpg" alt="The Flying Dragon Asian Kitchen" loading="lazy">
+      <div class="body">
+        <h3>The Flying Dragon — Asian Kitchen</h3>
+        <p>Website for the Asian Kitchen restaurant at Tomb of the Kings, Kato Paphos.</p>
+        <div class="tags"><span>Static site</span><span>GitHub Pages</span></div>
+        <div class="links"><a href="https://theflyingdragonpaphos.github.io/flyingdragontombofkings/">Visit</a></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="hardware">
+  <h2>Hardware &amp; firmware</h2>
+  <p class="sub">Embedded C for wearable electrochemical and multi-sensor devices.</p>
+  <div class="grid">
+    <article class="card">
+      <div class="ph">BL5340 · 7 sensors<br>600 s microSD recording</div>
+      <div class="body">
+        <h3>Multimodal wearable firmware</h3>
+        <p>Firmware that runs seven sensors at once (optical, heart, motion, CO₂, temperature, particulates and electrochemical) and logs CRC-protected, timestamped data to microSD, then reads it back to verify.</p>
+        <div class="tags"><span>C</span><span>Zephyr / nRF Connect</span><span>AD5941</span></div>
+        <p class="note">Research code, private.</p>
+      </div>
+    </article>
+    <article class="card">
+      <div class="ph">AD5941 + MSP430<br>Cyclic voltammetry</div>
+      <div class="body">
+        <h3>Potentiostat CV/LSV firmware</h3>
+        <p>Voltammetry firmware for a wearable potentiostat. Includes a live UART plotter and a hardware debugging investigation that traced a 0.22 V peak shift to a constant DAC offset, rather than iR drop.</p>
+        <div class="tags"><span>C</span><span>MSP430</span><span>Debugging</span></div>
+        <p class="note">Research code, private.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<footer>
+  Built with Claude. Each project's code is checked, tested and reviewed by me before it ships.
+</footer>
+</div>
+</body>
+</html>
