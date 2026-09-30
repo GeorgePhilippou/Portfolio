@@ -50,6 +50,7 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
     <a href="#tools">Everyday tools</a>
     <a href="#business">Business websites</a>
     <a href="#hardware">Hardware &amp; firmware</a>
+    <a href="#about">About</a>
   </nav>
 </header>
 
@@ -76,7 +77,7 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
       </div>
     </article>
     <article class="card">
-      <div class="ph">How do we know humans evolved?<br>64-page A5 booklet</div>
+      <img src="img/booklet.jpg" alt="Cover and first page of the Human Evolution Booklet" loading="lazy">
       <div class="body">
         <h3>Human Evolution Booklet</h3>
         <p>A 64-page illustrated booklet on the evidence for human evolution. Built with a Python and HTML pipeline, with an automatic layout checker and every new fact verified against DOIs.</p>
@@ -85,7 +86,7 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
       </div>
     </article>
     <article class="card">
-      <div class="ph">Signals &amp; Systems<br>Interactive Laboratory</div>
+      <img src="img/signals.jpg" alt="Signals Lab home page" loading="lazy">
       <div class="body">
         <h3>Signals &amp; Systems Lab</h3>
         <p>A local-first teaching tool that links the maths, plots and physical intuition for signals and systems, with an accessible data table behind every plot.</p>
@@ -98,7 +99,7 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
 
 <section id="games">
   <h2>Games</h2>
-  <p class="sub">Playable in the browser, and designed for iPad and Apple Pencil.</p>
+  <p class="sub">Mostly playable in the browser, and designed for iPad and Apple Pencil.</p>
   <div class="grid">
     <article class="card">
       <img src="img/dots.jpg" alt="Dots and Boxes start screen" loading="lazy">
@@ -119,12 +120,21 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
       </div>
     </article>
     <article class="card">
-      <div class="ph">George in WegTown II</div>
+      <img src="img/wegtown.jpg" alt="WegTown gameplay" loading="lazy">
       <div class="body">
-        <h3>George in WegTown II</h3>
-        <p>A 2D arcade game: dodge your enemies, collect your friends, and survive with three lives. Has a two-player mode, custom character art and a quip for every pickup.</p>
-        <div class="tags"><span>HTML5 canvas</span><span>Swift Mac app</span><span>Two-player</span></div>
-        <p class="note">Private for now, since it uses friends' likenesses.</p>
+        <h3>WegTown</h3>
+        <p>A 2D arcade game: collect friends, dodge everyone else, and survive the "Rex Mayhem" that hits every 30 seconds. One or two players, with a shark that goes wild on a timer. This is the family-friendly edition of a game I made for my mates.</p>
+        <div class="tags"><span>HTML5 canvas</span><span>Two-player</span><span>Synth sound effects</span></div>
+        <div class="links"><a href="games/wegtown/">Play</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <img src="img/warfare.jpg" alt="Warfare 1917 title screen running in the standalone app" loading="lazy">
+      <div class="body">
+        <h3>Warfare 1917 — standalone Mac app</h3>
+        <p>I turned a Flash game I love into a standalone Mac app, after browsers dropped Flash. It runs the game through the Ruffle emulator inside a native Swift wrapper, and a custom WebSocket relay adds a local two-player mode with a phone or tablet as the second controller.</p>
+        <div class="tags"><span>Swift</span><span>Ruffle</span><span>WebSockets</span><span>Python</span></div>
+        <p class="note">Original game by Armor Games. Not hosted here.</p>
       </div>
     </article>
   </div>
@@ -176,7 +186,7 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
   <p class="sub">Embedded C for wearable electrochemical and multi-sensor devices.</p>
   <div class="grid">
     <article class="card">
-      <div class="ph">BL5340 · 7 sensors<br>600 s microSD recording</div>
+      <img src="img/firmware-multimodal.svg" alt="Diagram: seven sensors feed a timestamped queue, CRC-protected frames and microSD" loading="lazy">
       <div class="body">
         <h3>Multimodal wearable firmware</h3>
         <p>Firmware that runs seven sensors at once (optical, heart, motion, CO₂, temperature, particulates and electrochemical) and logs CRC-protected, timestamped data to microSD, then reads it back to verify.</p>
@@ -185,7 +195,7 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
       </div>
     </article>
     <article class="card">
-      <div class="ph">AD5941 + MSP430<br>Cyclic voltammetry</div>
+      <img src="img/firmware-potentiostat.svg" alt="Diagram of the potentiostat signal chain and the DAC offset finding" loading="lazy">
       <div class="body">
         <h3>Potentiostat CV/LSV firmware</h3>
         <p>Voltammetry firmware for a wearable potentiostat. Includes a live UART plotter and a hardware debugging investigation that traced a 0.22 V peak shift to a constant DAC offset, rather than iR drop.</p>
@@ -194,6 +204,12 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
       </div>
     </article>
   </div>
+</section>
+
+<section id="about">
+  <h2>About</h2>
+  <p class="sub" style="max-width:640px">I'm George Philippou. I work on firmware for wearable electrochemical sensors, and I use AI to build everything else on this page. I choose what gets built, check the facts, test the results and fix what breaks.</p>
+  <div class="links"><a href="https://github.com/GeorgePhilippou">GitHub profile</a></div>
 </section>
 
 <footer>
