@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>George Philippou — Projects Built with AI</title>
 <meta name="description" content="A portfolio of educational sites, games, tools and websites built with Claude and ChatGPT.">
+<script>document.documentElement.classList.add("js")</script>
 <style>
 :root{--bg:#f6f5ea;--card:#ffffff;--ink:#1e2213;--muted:#62664f;--line:#dedcc6;--accent:#c2571f;--hero:#63722b;--hero-ink:#f6f5e6;--hero-mut:#d8dcb8;--hero-accent:#f6b27c;--chip:#ebeadb;--shadow:0 1px 2px rgba(50,60,20,.06),0 8px 24px rgba(50,60,20,.08)}
 @media (prefers-color-scheme:dark){:root{--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#f0935f;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--hero-accent:#f0935f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}}
@@ -26,7 +27,8 @@ h1{font:600 clamp(36px,5.5vw,60px)/1.08 Georgia,"Source Serif 4",serif;margin:0 
 header p.lede{margin:0;max-width:600px;font-size:19px;color:var(--hero-mut)}
 section{padding:40px 0 16px}
 .head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
-.head h2{font:600 28px Georgia,serif;margin:0;padding-bottom:8px;border-bottom:3px solid var(--accent)}
+.head h2{font:600 28px Georgia,serif;margin:0;padding-bottom:8px;position:relative}
+.head h2::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--accent);transform-origin:left}
 .head .n{font-size:13px;color:var(--muted)}
 section>p.sub{margin:0 0 28px;color:var(--muted);max-width:640px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;align-items:stretch}
@@ -59,6 +61,26 @@ footer p{margin:0;max-width:640px}
 footer a{color:var(--accent);font-weight:600;text-decoration:none}
 @media (max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}.trio{grid-template-columns:1fr 1fr}.trio section:nth-child(3){grid-column:span 2}.trio .grid{grid-template-columns:1fr}}
 @media (max-width:640px){.wrap{padding:0 20px}.grid,.trio,.trio section:nth-child(3) .grid{grid-template-columns:1fr}.trio section:nth-child(3){grid-column:auto}.bar nav{display:none}header{padding:48px 0 24px}}
+.card img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.card:hover{box-shadow:0 2px 4px rgba(40,50,10,.08),0 18px 40px rgba(40,50,10,.16)}
+.card:hover img{transform:scale(1.045)}
+.card{transition:transform .25s ease,box-shadow .25s ease}
+.wip{display:flex;align-items:center;gap:6px}
+.wip i{display:block;width:6px;height:6px;border-radius:50%;background:#fff}
+.bar nav a{transition:background .2s,color .2s}
+.bar nav a.active{background:rgba(255,255,255,.16);color:var(--hero-ink)}
+@media (prefers-reduced-motion:no-preference){
+ .wip i{animation:pulse 2.2s ease-in-out infinite}
+ @keyframes pulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+ @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+ header .eyebrow{animation:rise .7s ease both}
+ header h1{animation:rise .8s .1s ease both}
+ header p.lede{animation:rise .8s .22s ease both}
+ .js .reveal:not(.in){opacity:0;transform:translateY(26px)}
+ .js .reveal{transition:opacity .7s ease var(--d,0s),transform .7s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+ .js .head h2::after{transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.2,1) .15s}
+ .js section.in .head h2::after{transform:scaleX(1)}
+}
 </style>
 </head>
 <body>
@@ -93,6 +115,26 @@ document.getElementById("root").innerHTML=sec(byId.learn)+sec(byId.games)+
 fetch("https://georgephilippou.github.io/booklet-pdf/latest.json").then(r=>r.ok?r.json():null).then(j=>{
  const el=document.querySelector('[data-updated="booklet"]');
  if(j&&el){const d=new Date(j.updated).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});el.textContent="Updated "+d+"."}}).catch(()=>{});
+
+(function(){
+ const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+ const secs=[...document.querySelectorAll("section")];
+ if(reduce||!("IntersectionObserver" in window)){secs.forEach(s=>s.classList.add("in"));}
+ else{
+  document.querySelectorAll(".card").forEach(c=>c.classList.add("reveal"));
+  document.querySelectorAll(".head,section>p.sub").forEach(c=>c.classList.add("reveal"));
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const sec=e.target;io.unobserve(sec);sec.classList.add("in");
+   const items=[...sec.querySelectorAll(".reveal")];
+   items.forEach((el,i)=>{const d=(el.classList.contains("card")?0.12+(i%4)*0.09:0);el.style.setProperty("--d",d+"s");requestAnimationFrame(()=>el.classList.add("in"));
+    setTimeout(()=>{el.classList.remove("reveal");el.style.removeProperty("--d")},(d*1000)+900)});
+  }),{threshold:0.08,rootMargin:"0px 0px -6% 0px"});
+  secs.forEach(s=>io.observe(s));
+ }
+ const links=[...document.querySelectorAll(".bar nav a")];
+ const map=new Map(links.map(a=>[a.getAttribute("href").slice(1),a]));
+ const nav=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove("active"));const a=map.get(e.target.id);if(a)a.classList.add("active")}}),{rootMargin:"-35% 0px -60% 0px"});
+ [...secs,document.getElementById("about")].forEach(s=>s&&nav.observe(s));
+})();
 </script>
 </body>
 </html>
