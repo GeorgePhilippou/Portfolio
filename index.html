@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>George Philippou — Projects Built with AI</title>
-<meta name="description" content="A portfolio of educational sites, games, tools, websites and firmware built with AI.">
+<meta name="description" content="A portfolio of educational sites, games, tools, and websites built with AI.">
 <style>
 :root{--bg:#fbfaf7;--card:#fff;--ink:#1c1b19;--muted:#6b675f;--line:#e6e2d9;--accent:#b8532f;--chip:#f1ede4}
 @media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1d1b;--ink:#f1eee8;--muted:#a09b90;--line:#2e2c28;--accent:#e08a66;--chip:#2a2825}}
@@ -43,13 +43,12 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
 <header>
   <p class="eyebrow">George Philippou</p>
   <h1>Things I've built with AI</h1>
-  <p class="lede">Reference sites, games, tools, websites and embedded firmware, made in collaboration with Claude. I set the direction, check the facts and test the results.</p>
+  <p class="lede">Reference sites, games, tools and websites, made in collaboration with Claude. I set the direction, check the facts and test the results.</p>
   <nav>
     <a href="#learn">Learning &amp; reference</a>
     <a href="#games">Games</a>
     <a href="#tools">Everyday tools</a>
     <a href="#business">Business websites</a>
-    <a href="#hardware">Hardware &amp; devices</a>
     <a href="#about">About</a>
   </nav>
 </header>
@@ -153,6 +152,15 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
         <div class="links"><a href="https://georgephilippou.github.io/TripMap/">Open</a><a href="https://github.com/GeorgePhilippou/TripMap">Code</a></div>
       </div>
     </article>
+    <article class="card">
+      <img src="img/hal-pipeline.svg" alt="Diagram of HAL: wake word, speech to text, Claude, text to speech, with an OLED face" loading="lazy">
+      <div class="body">
+        <h3>HAL — voice assistant</h3>
+        <p>A home-built voice assistant on a Raspberry Pi 5, styled after HAL 9000. It listens for a wake word, transcribes speech locally, replies through Claude and starts speaking before the answer is finished. It has an OLED face, an iPhone companion app, long-term memory per person, timers and music, and over 12,000 lines of Python with automated tests.</p>
+        <div class="tags"><span>Python</span><span>Raspberry Pi</span><span>Whisper</span><span>Claude API</span><span>Piper TTS</span></div>
+        <p class="note">Runs on my home network, so there's no public demo.</p>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -181,43 +189,9 @@ footer{padding:56px 0 64px;color:var(--muted);font-size:14px}
   </div>
 </section>
 
-<section id="hardware">
-  <h2>Hardware &amp; devices</h2>
-  <p class="sub">Firmware for wearable sensors, and a voice assistant I built on a Raspberry Pi.</p>
-  <div class="grid">
-    <article class="card">
-      <img src="img/hal-pipeline.svg" alt="Diagram of HAL: wake word, speech to text, Claude, text to speech, with an OLED face" loading="lazy">
-      <div class="body">
-        <h3>HAL — voice assistant</h3>
-        <p>A home-built voice assistant on a Raspberry Pi 5, styled after HAL 9000. It listens for a wake word, transcribes speech locally, replies through Claude and starts speaking before the answer is finished. It has an OLED face, an iPhone companion app, long-term memory per person, timers and music, and over 12,000 lines of Python with automated tests.</p>
-        <div class="tags"><span>Python</span><span>Raspberry Pi</span><span>Whisper</span><span>Claude API</span><span>Piper TTS</span></div>
-        <p class="note">Runs on my home network, so there's no public demo.</p>
-      </div>
-    </article>
-    <article class="card">
-      <img src="img/firmware-multimodal.svg" alt="Diagram: seven sensors feed a timestamped queue, CRC-protected frames and microSD" loading="lazy">
-      <div class="body">
-        <h3>Multimodal wearable firmware</h3>
-        <p>Firmware that runs seven sensors at once (optical, heart, motion, CO₂, temperature, particulates and electrochemical) and logs CRC-protected, timestamped data to microSD, then reads it back to verify.</p>
-        <div class="tags"><span>C</span><span>Zephyr / nRF Connect</span><span>AD5941</span></div>
-        <p class="note">Research code, private.</p>
-      </div>
-    </article>
-    <article class="card">
-      <img src="img/firmware-potentiostat.svg" alt="Diagram of the potentiostat signal chain and the DAC offset finding" loading="lazy">
-      <div class="body">
-        <h3>Potentiostat CV/LSV firmware</h3>
-        <p>Voltammetry firmware for a wearable potentiostat. Includes a live UART plotter and a hardware debugging investigation that traced a 0.22 V peak shift to a constant DAC offset, rather than iR drop.</p>
-        <div class="tags"><span>C</span><span>MSP430</span><span>Debugging</span></div>
-        <p class="note">Research code, private.</p>
-      </div>
-    </article>
-  </div>
-</section>
-
 <section id="about">
   <h2>About</h2>
-  <p class="sub" style="max-width:640px">I'm George Philippou. I work on firmware for wearable electrochemical sensors, and I use AI to build everything else on this page. I choose what gets built, check the facts, test the results and fix what breaks.</p>
+  <p class="sub" style="max-width:640px">I'm George Philippou. I use AI to build the projects on this page. I choose what gets built, check the facts, test the results and fix what breaks.</p>
   <div class="links"><a href="https://github.com/GeorgePhilippou">GitHub profile</a></div>
 </section>
 
