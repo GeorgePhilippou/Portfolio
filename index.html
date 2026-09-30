@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>George Philippou — Projects Built with AI</title>
 <meta name="description" content="A portfolio of educational sites, games, tools and websites built with Claude and ChatGPT.">
-<script>document.documentElement.classList.add("js")</script>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 :root{--bg:#f6f5ea;--card:#ffffff;--ink:#1e2213;--muted:#62664f;--line:#dedcc6;--accent:#c2571f;--hero:#63722b;--hero-ink:#f6f5e6;--hero-mut:#d8dcb8;--hero-accent:#f6b27c;--chip:#ebeadb;--shadow:0 1px 2px rgba(50,60,20,.06),0 8px 24px rgba(50,60,20,.08)}
-@media (prefers-color-scheme:dark){:root{--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#f0935f;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--hero-accent:#f0935f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#f0935f;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--hero-accent:#f0935f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}}
+:root[data-theme="dark"]{--bg:#11140b;--card:#191d11;--ink:#eef0de;--muted:#a3a98a;--line:#2a3019;--accent:#f0935f;--hero:#2b3417;--hero-ink:#eef0de;--hero-mut:#b9c08f;--hero-accent:#f0935f;--chip:#232918;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
@@ -81,11 +82,42 @@ footer a{color:var(--accent);font-weight:600;text-decoration:none}
  .js .head h2::after{transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.2,1) .15s}
  .js section.in .head h2::after{transform:scaleX(1)}
 }
+.bar .wrap{gap:12px}
+.bar nav{margin-left:auto}
+.tools{display:flex;gap:6px;flex:none}
+.tbtn{font:inherit;font-size:13px;line-height:1;padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:transparent;color:var(--hero-ink);cursor:pointer;transition:background .2s,color .2s}
+.tbtn:hover{background:#fff;color:var(--hero)}
+.egg{margin:26px 0 0!important;font-size:11px;letter-spacing:.08em;opacity:.45;cursor:pointer;width:max-content;transition:opacity .3s}
+.egg:hover,.egg:focus-visible{opacity:1;outline:none}
+dialog.pop{border:1px solid var(--line);border-radius:18px;padding:0;background:var(--card);color:var(--ink);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+dialog.pop::backdrop{background:rgba(10,12,6,.66);backdrop-filter:blur(3px)}
+.pop .x{position:absolute;top:10px;right:12px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:18px;cursor:pointer;z-index:2}
+#hal{width:min(520px,92vw);background:#050505;color:#e8e8e8;border-color:#2a0000;text-align:center}
+.halbody{padding:44px 28px 34px;font-family:ui-monospace,Menlo,monospace}
+.eye{width:92px;height:92px;border-radius:50%;margin:0 auto 26px;background:radial-gradient(circle at 50% 50%,#ffd7a0 0 6%,#ff3b1f 14%,#b00d00 38%,#3a0300 62%,#111 72%);box-shadow:0 0 34px #ff2a0f88,0 0 0 6px #181818,0 0 0 8px #333}
+.halbody h3{margin:0 0 10px;font-size:19px;font-weight:500;line-height:1.5}
+.halbody p{margin:0;font-size:12.5px;opacity:.55}
+#play{width:min(520px,96vw)}
+.tabs{display:flex;gap:6px;padding:14px 16px 0}
+.tabs button{font:inherit;font-size:14px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--hero);color:var(--hero-ink);border-color:var(--hero)}
+.pane{padding:14px 16px 18px}
+#wframe{width:100%;height:min(74vh,760px);border:0;border-radius:12px;background:#0a0f1c;display:block}
+.memory{text-align:center}
+.memory p{margin:0 0 12px;color:var(--muted);font-size:14px}
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:340px;margin:0 auto 14px}
+.pad{aspect-ratio:1;border-radius:20px;border:0;cursor:pointer;opacity:.5;transition:opacity .12s,transform .12s,box-shadow .12s}
+.pad.lit{opacity:1;transform:scale(1.04);box-shadow:0 0 28px currentColor}
+.pad:disabled{cursor:default}
+.memory .stat{font-weight:600;margin:0 0 12px}
+.memory .go{font:inherit;font-weight:600;padding:9px 22px;border-radius:999px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--hero);color:var(--hero-ink);padding:10px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;z-index:50}
+.toast.show{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
 <div class="bar"><div class="wrap"><b>George Philippou</b>
-<nav><a href="#learn">Learning</a><a href="#games">Games</a><a href="#apps">Apps</a><a href="#assistant">Assistant</a><a href="#business">Websites</a><a href="#about">About</a></nav></div></div>
+<nav><a href="#learn">Learning</a><a href="#games">Games</a><a href="#apps">Apps</a><a href="#assistant">Assistant</a><a href="#business">Websites</a><a href="#about">About</a></nav><div class="tools"><button id="playBtn" class="tbtn">▶ Play</button><button id="themeBtn" class="tbtn" aria-label="Switch light or dark mode" title="Light / dark">◐</button></div></div></div>
 <div class="hero"><div class="wrap">
 <header>
   <p class="eyebrow">Portfolio</p>
@@ -95,7 +127,14 @@ footer a{color:var(--accent);font-weight:600;text-decoration:none}
 </div></div>
 <div class="wrap"><div id="root"></div>
 </div>
-<footer id="about"><div class="wrap"><p>I'm George Philippou. I use AI to build the projects on this page, choosing what gets built, checking the facts, testing the results and fixing what breaks.</p><p style="margin-top:14px"><a href="https://github.com/GeorgePhilippou">GitHub profile ↗</a></p></div></footer>
+<footer id="about"><div class="wrap"><p>I'm George Philippou. I use AI to build the projects on this page, choosing what gets built, checking the facts, testing the results and fixing what breaks.</p><p style="margin-top:14px"><a href="https://github.com/GeorgePhilippou">GitHub profile ↗</a></p><p id="egg" class="egg" tabindex="0" role="button" aria-label="Everything in its right place">everything in its right place</p></div></footer>
+<dialog id="hal" class="pop"><button class="x" aria-label="Close" data-close>×</button><div class="halbody"><div class="eye"></div><h3>I'm sorry, Dave. I'm afraid I can't do that.</h3><p>(You found the HAL easter egg.)</p></div></dialog>
+<dialog id="play" class="pop"><button class="x" aria-label="Close" data-close>×</button>
+ <div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="w">WegTown</button><button role="tab" aria-selected="false" data-tab="m">Pattern memory</button></div>
+ <div class="pane" id="pane-w"><iframe id="wframe" title="WegTown (family-friendly edition)"></iframe></div>
+ <div class="pane memory" id="pane-m" hidden><p>Watch the pattern, then repeat it. It grows by one each round.</p>
+  <div class="pads" id="pads"></div><p class="stat" id="mstat">Press start</p><button class="go" id="mgo">Start</button></div></dialog>
+<div class="toast" id="toast" role="status"></div>
 <script>
 const ITEMS=[{"cat": "learn", "catName": "Learning & reference", "title": "Hellenika", "img": "img/hellenika.jpg", "alt": "Hellenika home page", "desc": "An interactive atlas of the Ancient Greek world, 3200–30 BC. 400+ connected entities on a timeline and map, with every claim tagged by its evidence and how confident we can be.", "tags": ["Vanilla JS", "PWA", "Canvas maps"], "note": "", "links": [["https://georgephilippou.github.io/Hellenika/", "Open"], ["https://github.com/GeorgePhilippou/Hellenika", "Code"]], "short": "Hellenika", "wip": true}, {"cat": "learn", "catName": "Learning & reference", "title": "Dinosauria", "img": "img/dinosauria.jpg", "alt": "Dinosauria home page", "desc": "An open scientific wiki of 328 dinosaur and early-bird profiles, built on the Natural History Museum's Dino Directory, the Paleobiology Database and published research.", "tags": ["JavaScript", "Open data", "Scientific review"], "note": "", "links": [["https://georgephilippou.github.io/Dinosauria/", "Open"], ["https://github.com/GeorgePhilippou/Dinosauria", "Code"]], "short": "Dinosauria", "wip": true}, {"cat": "learn", "catName": "Learning & reference", "title": "Human Evolution Booklet", "img": "img/booklet.jpg", "alt": "Cover and first page of the Human Evolution Booklet", "desc": "A 64-page illustrated booklet on the evidence for human evolution, made with a Python pipeline and an automatic layout checker. Every new fact is verified against DOIs.", "tags": ["Python", "Typesetting", "Custom figures"], "note": "Draft.", "links": [["https://georgephilippou.github.io/booklet-pdf/Human-Evolution-Booklet.pdf", "Read"], ["https://georgephilippou.github.io/booklet-pdf/Human-Evolution-Booklet.pdf#dl", "Download"]], "short": "Human Evolution Booklet", "id": "booklet", "wip": true}, {"cat": "learn", "catName": "Learning & reference", "title": "Signals & Systems Lab", "img": "img/signals.jpg", "alt": "Signals Lab home page", "desc": "A local-first teaching tool that links the maths, plots and physical intuition for signals and systems, with curated explanations and an accessible data table behind every plot.", "tags": ["TypeScript", "Education", "Accessibility"], "note": "", "links": [], "short": "Signals Lab", "wip": true}, {"cat": "apps", "catName": "Everyday tools", "title": "TripMap", "img": "img/tripmap.jpg", "alt": "TripMap", "desc": "A mobile-first trip planner. Collect places on a map, build day-by-day itineraries with flights and checklists, and plan together with another traveller in real time. Works offline.", "tags": ["Leaflet", "PWA", "Firebase"], "note": "", "links": [["https://georgephilippou.github.io/TripMap/", "Open"], ["https://github.com/GeorgePhilippou/TripMap", "Code"]], "short": "TripMap", "wip": true}, {"cat": "assistant", "catName": "Everyday tools", "title": "HAL", "img": "img/hal.jpg", "alt": "HAL: a black monolith-style box with a glowing OLED eye and speaker vents", "desc": "A home-built voice assistant on a Raspberry Pi 5, in a black monolith case inspired by 2001, with a HAL-style OLED eye, long-term memory, timers and an iPhone companion app.", "tags": ["Python", "Raspberry Pi", "Whisper", "Claude API"], "note": "Private: runs on my home network.", "links": [], "short": "HAL", "wip": true}, {"cat": "games", "catName": "Games", "title": "Dots & Boxes", "img": "img/dots.jpg", "alt": "Dots and Boxes start screen", "desc": "The classic pen-and-paper game, designed for Apple Pencil. Play with two players, against the computer or across two iPads online, on a choice of board sizes.", "tags": ["PWA", "Firebase", "Online multiplayer"], "note": "", "links": [["https://georgephilippou.github.io/dots-and-boxes/", "Play"], ["https://github.com/GeorgePhilippou/dots-and-boxes", "Code"]], "short": "Dots & Boxes", "wip": false}, {"cat": "games", "catName": "Games", "title": "Mosaic Mates", "img": "img/mosaic.jpg", "alt": "Mosaic Mates menu", "desc": "An original block-placement puzzle for two. Drag shapes onto an 8×8 board and clear rows and columns in solo, shared-board or score-race modes, or play online in private rooms.", "tags": ["PWA", "Firebase", "Real-time sync"], "note": "", "links": [["https://georgephilippou.github.io/mosaic-mates/", "Play"], ["https://github.com/GeorgePhilippou/mosaic-mates", "Code"]], "short": "Mosaic Mates", "wip": false}, {"cat": "games", "catName": "Games", "title": "George in WegTown II", "img": "img/wegtown.jpg", "alt": "George in WegTown II gameplay with caricatures of friends falling down the screen", "desc": "A fast arcade game starring my friends. Catch friends for points and hearts, dodge everyone else and survive the berserk enemy every 30 seconds. Play solo, or co-op with revives.", "tags": ["HTML5 canvas", "Co-op 2-player", "Web Audio"], "note": "Contains strong language.", "links": [["games/wegtown-original/", "Play"], ["games/wegtown/", "Family-friendly"]], "short": "George in WegTown II", "wip": false}, {"cat": "games", "catName": "Games", "title": "Warfare 1917", "img": "img/warfare.jpg", "alt": "Warfare 1917 title screen running in the standalone app", "desc": "I turned a Flash game I love into a standalone Mac app, running it through the Ruffle emulator in a native Swift wrapper, with a local two-player mode using a phone as controller.", "tags": ["Swift", "Ruffle", "WebSockets", "Python"], "note": "Original game by Armor Games.", "links": [], "short": "Warfare 1917", "wip": false}, {"cat": "business", "catName": "Family business websites", "title": "Flying Dragon Takeaway", "img": "img/fd-emba.jpg", "alt": "The Flying Dragon Thai and Chinese Takeaway", "desc": "Website for the Thai and Chinese takeaway in Chlorakas, Paphos. It shows the menu, location and opening hours, with buttons to call, order online and view the full menu.", "tags": ["Static site", "GitHub Pages"], "note": "", "links": [["https://theflyingdragonpaphos.github.io/FlyingDragonEmba/", "Visit"]], "short": "Flying Dragon · Takeaway", "wip": false}, {"cat": "business", "catName": "Family business websites", "title": "Flying Dragon Kitchen", "img": "img/fd-tomb.jpg", "alt": "The Flying Dragon Asian Kitchen", "desc": "Website for the Asian Kitchen restaurant at Tomb of the Kings, Kato Paphos. It has a gallery, menu highlights, location and opening hours, with buttons to call and order online.", "tags": ["Static site", "GitHub Pages"], "note": "", "links": [["https://theflyingdragonpaphos.github.io/flyingdragontombofkings/", "Visit"]], "short": "Flying Dragon · Asian Kitchen", "wip": false}];
 const SECTIONS=[
@@ -116,6 +155,49 @@ fetch("https://georgephilippou.github.io/booklet-pdf/latest.json").then(r=>r.ok?
  const el=document.querySelector('[data-updated="booklet"]');
  if(j&&el){const d=new Date(j.updated).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});el.textContent="Updated "+d+"."}}).catch(()=>{});
 
+(function(){
+ const $=id=>document.getElementById(id);
+ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+ const toast=t=>{const el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),2600)};
+ // theme toggle
+ $("themeBtn").onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");const next=cur==="dark"?"light":"dark";document.documentElement.dataset.theme=next;store.set("theme",next)};
+ // dialogs
+ document.querySelectorAll("dialog [data-close]").forEach(b=>b.onclick=()=>b.closest("dialog").close());
+ document.querySelectorAll("dialog.pop").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)d.close()}));
+ // HAL easter egg: click HAL's eye (photo) or enter the Konami code
+ const openHal=()=>$("hal").showModal();
+ document.querySelectorAll(".card").forEach(c=>{if(c.querySelector("h3").textContent==="HAL"){const im=c.querySelector("img");im.style.cursor="pointer";im.title="";im.addEventListener("click",openHal)}});
+ const seq=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];let ki=0,typed="";
+ // Radiohead easter egg: footer line or typing the name scrambles the cards, then puts everything back in its right place
+ const rightPlace=()=>{const cs=[...document.querySelectorAll(".card")];cs.forEach(c=>{const x=(Math.random()-.5)*260,y=(Math.random()-.5)*220,r=(Math.random()-.5)*34;
+   c.animate([{transform:"none"},{transform:`translate(${x}px,${y}px) rotate(${r}deg)`,offset:.3},{transform:`translate(${x}px,${y}px) rotate(${r}deg)`,offset:.6},{transform:"none"}],{duration:3200,easing:"cubic-bezier(.6,0,.2,1)"})});
+   toast("Everything in its right place.")};
+ $("egg").onclick=rightPlace;$("egg").onkeydown=e=>{if(e.key==="Enter"||e.key===" ")rightPlace()};
+ addEventListener("keydown",e=>{if(/input|textarea/i.test(e.target.tagName))return;
+  ki=(e.key===seq[ki]||e.key.toLowerCase()===seq[ki])?ki+1:(e.key===seq[0]?1:0);if(ki===seq.length){ki=0;openHal()}
+  if(e.key.length===1){typed=(typed+e.key.toLowerCase()).slice(-9);if(typed==="radiohead"){typed="";rightPlace()}}});
+ // play dialog
+ const pd=$("play"),wf=$("wframe");
+ const tab=t=>{pd.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));$("pane-w").hidden=t!=="w";$("pane-m").hidden=t!=="m";
+  if(t==="w"){if(!wf.src.includes("wegtown"))wf.src="games/wegtown/"}else wf.src="about:blank"};
+ pd.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+ $("playBtn").onclick=()=>{pd.showModal();tab(pd.querySelector("[aria-selected=true]").dataset.tab)};
+ pd.addEventListener("close",()=>{wf.src="about:blank";memStop()});
+ // pattern memory (simon-style)
+ const cols=["#63722b","#d9651f","#e7c98a","#3d5a80"],freq=[261.6,329.6,392,523.3];let ac=null,seqm=[],pos=0,busy=false,alive=false;
+ const pads=$("pads");cols.forEach((c,i)=>{const b=document.createElement("button");b.className="pad";b.style.background=c;b.style.color=c;b.setAttribute("aria-label","Pad "+(i+1));b.disabled=true;b.onclick=()=>press(i);pads.appendChild(b)});
+ const P=[...pads.children];
+ const tone=i=>{try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq[i];o.type="sine";o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.0001,ac.currentTime);g.gain.exponentialRampToValueAtTime(.25,ac.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.4);o.start();o.stop(ac.currentTime+.45)}catch(e){}};
+ const flash=(i,ms=380)=>new Promise(r=>{P[i].classList.add("lit");tone(i);setTimeout(()=>{P[i].classList.remove("lit");setTimeout(r,140)},ms)});
+ const best=()=>Number(store.get("memBest")||0);
+ const stat=t=>$("mstat").textContent=t;
+ async function playSeq(){busy=true;P.forEach(b=>b.disabled=true);stat("Watch…");await new Promise(r=>setTimeout(r,500));for(const i of seqm){if(!alive)return;await flash(i)}pos=0;busy=false;P.forEach(b=>b.disabled=false);stat("Your turn · Round "+seqm.length)}
+ function press(i){if(busy||!alive)return;flash(i,200);if(i!==seqm[pos]){alive=false;P.forEach(b=>b.disabled=true);const sc=seqm.length-1;if(sc>best())store.set("memBest",sc);stat("Game over · Score "+sc+" · Best "+best());$("mgo").textContent="Play again";return}
+  pos++;if(pos===seqm.length){seqm.push(Math.floor(Math.random()*4));setTimeout(playSeq,600)}}
+ function memStop(){alive=false;busy=false;P.forEach(b=>{b.disabled=true;b.classList.remove("lit")});stat("Press start · Best "+best());$("mgo").textContent="Start"}
+ $("mgo").onclick=()=>{alive=true;seqm=[Math.floor(Math.random()*4)];playSeq()};
+ memStop();
+})();
 (function(){
  const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
  const secs=[...document.querySelectorAll("section")];
