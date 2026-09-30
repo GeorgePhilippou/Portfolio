@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>George in WegTown II</title>
+<style>
+  :root{
+    --ink:#eaf2ff; --gold:#ffd978; --glass:#0b1324cc; --ring:#ffffff1a; --line:#ffffff22;
+    --p1:#45f0b0; --p2:#b491ff; --toast:#080e1e; --bg:#0a0f1c;
+    --warn-bg:#2a1500; --warn-border:#ff9500; --warn-text:#ffb340;
+    --marc-bg:#2a0000; --marc-border:#ff3b30; --marc-text:#ff7070;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+
+  .shell{min-height:100%;display:flex;flex-direction:column;gap:10px}
+  .hud{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 12px;flex-wrap:wrap}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{background:var(--glass);border:1px solid var(--ring);
+        padding:7px 12px;border-radius:14px;font-weight:700;display:flex;gap:10px;align-items:center;
+        -webkit-backdrop-filter:saturate(160%) blur(10px);backdrop-filter:saturate(160%) blur(10px)}
+  .pill{background:rgba(255,255,255,.10);padding:2px 8px;border-radius:999px;font-weight:800}
+  .pill.p1{color:var(--p1)} .pill.p2{color:var(--p2)}
+  .btn{-webkit-appearance:none;appearance:none;border:1px solid var(--ring);background:transparent;color:#fff;
+       padding:6px 12px;border-radius:12px;font-weight:700;cursor:pointer}
+
+  .stage-wrap{display:grid;place-items:center;flex:1;padding:10px}
+
+  /* Wider game: 3:4 aspect ratio */
+  .game-wrap{position:relative;width:min(100%,600px);aspect-ratio:3/4}
+  .frame{width:100%;height:100%;border-radius:18px;overflow:hidden;
+         box-shadow:0 10px 40px rgba(0,0,0,.6);background:#000}
+  canvas{width:100%;height:100%;display:block;background:#000}
+  .frame::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      linear-gradient(0deg,var(--line) 1px,transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/28px 100%;
+    opacity:.14}
+
+  .overlay{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:20px;text-align:center;z-index:4}
+  .panel{background:rgba(18,22,40,.92);border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;padding:18px 22px;width:min(92%,560px)}
+  h1{margin:0 0 10px;font-size:22px}
+  .muted{opacity:.9;margin-bottom:12px}
+  .buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .primary{background:var(--gold);color:#221a07;border:0;padding:10px 18px;border-radius:12px;font-weight:800;cursor:pointer}
+  .secondary{background:transparent;border:1px solid var(--ring);color:#fff;padding:10px 18px;border-radius:12px;font-weight:800;cursor:pointer}
+
+  /* Toast: centered in the game area, animated fade */
+  @keyframes msgPop{
+    0%  {opacity:0;transform:translate(-50%,calc(-50% + 14px))}
+    10% {opacity:1;transform:translate(-50%,-50%)}
+    72% {opacity:1;transform:translate(-50%,-50%)}
+    100%{opacity:0;transform:translate(-50%,-50%)}
+  }
+  .toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);
+    width:min(88%,380px);
+    background:var(--toast);border:1px solid rgba(255,255,255,.18);
+    color:#ddeeff;border-radius:16px;padding:13px 16px;font-size:14px;
+    line-height:1.45;text-align:center;font-weight:600;
+    box-shadow:0 8px 28px rgba(0,0,0,.65);
+    opacity:0;pointer-events:none;z-index:10}
+  .toast.show{animation:msgPop 3.6s ease forwards}
+
+  /* Banner */
+  .banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    padding:7px 16px;border-radius:12px;font-weight:800;font-size:13px;
+    letter-spacing:.2px;z-index:3;display:none;white-space:nowrap}
+  .banner.show{display:block}
+  .banner.warning{background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn-text);
+    animation:popIn .22s ease,pulse-warn 0.9s ease-in-out infinite alternate}
+  .banner.mayhem{background:var(--marc-bg);border:1px solid var(--marc-border);color:var(--marc-text);
+    animation:popIn .18s ease,pulse-marc 0.42s ease-in-out infinite alternate}
+  @keyframes popIn{from{transform:translateX(-50%) scale(.88);opacity:.1}to{transform:translateX(-50%) scale(1);opacity:1}}
+  @keyframes pulse-warn{from{box-shadow:0 0 6px var(--warn-border)}to{box-shadow:0 0 18px var(--warn-border),0 0 34px rgba(255,149,0,.35)}}
+  @keyframes pulse-marc{from{box-shadow:0 0 8px var(--marc-border)}to{box-shadow:0 0 24px var(--marc-border),0 0 46px rgba(255,59,48,.4)}}
+</style>
+</head>
+<body>
+  <audio id="bgm" src="IMG_2974.R.wav" preload="auto" loop></audio>
+
+  <div class="shell">
+    <div class="hud">
+      <div class="row">
+        <div class="chip">Time <span id="timeChip" class="pill">00:00</span></div>
+        <div class="chip">P1 Score <span id="p1Score" class="pill p1">0</span></div>
+        <div class="chip">P1 Lives <span id="p1Lives" class="pill p1">❤︎❤︎❤︎</span></div>
+      </div>
+      <div class="row">
+        <div class="chip" id="p2ScoreWrap" style="display:none">P2 Score <span id="p2Score" class="pill p2">0</span></div>
+        <div class="chip" id="p2LivesWrap" style="display:none">P2 Lives <span id="p2Lives" class="pill p2">❤︎❤︎❤︎</span></div>
+        <div class="chip">Best <span id="bestChip" class="pill">0</span></div>
+        <button id="pauseBtn" class="btn">Pause</button>
+        <button id="restartBtn" class="btn">Restart</button>
+      </div>
+    </div>
+
+    <div class="stage-wrap">
+      <div class="game-wrap">
+        <div class="frame" id="frame">
+          <canvas id="game" width="480" height="640"></canvas>
+          <div id="banner" class="banner"></div>
+          <div id="overlay" class="overlay"><div class="panel" id="panel"></div></div>
+        </div>
+        <div id="toast" class="toast"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+window.addEventListener('error',e=>{
+  console.error(e.error||e.message);
+  const t=document.getElementById('toast');
+  if(t){ t.textContent='Error: '+(e.message||'unknown'); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); }
+});
+window.addEventListener('unhandledrejection',e=>{
+  console.error('Rejection:',e.reason);
+  const t=document.getElementById('toast');
+  if(t){ t.textContent='Async error: '+(e.reason?.message??e.reason); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); }
+});
+
+(function(){
+  /* ---------- DOM ---------- */
+  const canvas  = document.getElementById('game');
+  const ctx     = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const panel   = document.getElementById('panel');
+  const toast   = document.getElementById('toast');
+  const banner  = document.getElementById('banner');
+  const bgm     = document.getElementById('bgm'); bgm.volume=0.35;
+
+  const timeChip    = document.getElementById('timeChip');
+  const bestChip    = document.getElementById('bestChip');
+  const p1ScoreEl   = document.getElementById('p1Score');
+  const p2ScoreEl   = document.getElementById('p2Score');
+  const p1LivesEl   = document.getElementById('p1Lives');
+  const p2LivesEl   = document.getElementById('p2Lives');
+  const p2ScoreWrap = document.getElementById('p2ScoreWrap');
+  const p2LivesWrap = document.getElementById('p2LivesWrap');
+  const pauseBtn    = document.getElementById('pauseBtn');
+  const restartBtn  = document.getElementById('restartBtn');
+
+  /* ---------- CONSTANTS ---------- */
+  const MAX_LIVES         = 6;
+  const INITIAL_LIVES     = 3;
+  const FRIEND_SCORE      = 15;
+  const PLAYER_SPEED      = 280;
+  const PLAYER_RADIUS     = 14;
+  const PLAYER_SPRITE     = 52;
+  const IFRAMES_DURATION  = 1.4;
+  const DIFFICULTY_MAX    = 3.8;
+  const DIFFICULTY_RATE   = 0.033;
+  const MAYHEM_CYCLE      = 30;
+  const MAYHEM_DURATION   = 10;
+  const MAYHEM_FIRST      = 30;
+  const WARNING_BEFORE    = 5;
+  const MARC_SPEED_MULT   = 1.6;
+  const MARC_MAYHEM_SPEED = 250;
+
+  /* ---------- AUDIO ---------- */
+  let audioCtx=null;
+  function ensureAudio(){
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    return audioCtx;
+  }
+  function playTone(freq,dur,type,vol,delay){
+    try{
+      type=type||'sine'; vol=vol||0.3; delay=delay||0;
+      const ac=ensureAudio(),o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.value=freq; o.type=type;
+      const t0=ac.currentTime+delay;
+      g.gain.setValueAtTime(0.001,t0);
+      g.gain.linearRampToValueAtTime(vol,t0+0.012);
+      g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+      o.start(t0); o.stop(t0+dur+0.06);
+    }catch(e){}
+  }
+  const SFX={
+    collect:     ()=>{ playTone(880,0.10,'sine',0.20); playTone(1320,0.14,'sine',0.15,0.07); },
+    lifeGain:    ()=>{ [523,659,784,1047].forEach((f,i)=>playTone(f,0.18,'sine',0.28,i*0.07)); },
+    hit:         ()=>{ playTone(90,0.35,'sawtooth',0.42); playTone(140,0.18,'square',0.22,0.04); },
+    warning:     ()=>{ [440,550,440,660].forEach((f,i)=>playTone(f,0.13,'square',0.10,i*0.16)); },
+    mayhemStart: ()=>{ playTone(220,0.7,'sawtooth',0.36); playTone(110,0.85,'sawtooth',0.26,0.12); },
+    gameOver:    ()=>{ [330,262,196,165].forEach((f,i)=>playTone(f,0.5,'sine',0.34,i*0.18)); },
+    revive:      ()=>{ [523,784,1047,1319].forEach((f,i)=>playTone(f,0.20,'sine',0.26,i*0.08)); },
+  };
+
+  /* ---------- PARTICLES ---------- */
+  const particles=[];
+  function addFloater(x,y,text,color){
+    particles.push({x,y,text,color:color||'#ffd978',life:1.1,maxLife:1.1,vy:-55});
+  }
+  function updateParticles(dt){
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i]; p.life-=dt; p.y+=p.vy*dt;
+      if(p.life<=0) particles.splice(i,1);
+    }
+  }
+  function drawParticles(){
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    for(const p of particles){
+      const a=Math.min(1,(p.life/p.maxLife)*1.6);
+      ctx.globalAlpha=Math.max(0,a);
+      ctx.fillStyle=p.color;
+      ctx.font='bold 18px system-ui,-apple-system,sans-serif';
+      ctx.fillText(p.text,p.x,p.y);
+    }
+    ctx.globalAlpha=1; ctx.restore();
+  }
+
+  /* ---------- SCREEN SHAKE ---------- */
+  let shakeTime=0;
+  function triggerShake(){ shakeTime=0.28; }
+
+  /* ---------- MESSAGES ---------- */
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function toastMsg(text){
+    toast.textContent=text;
+    toast.classList.remove('show');
+    void toast.offsetWidth; // restart animation
+    toast.classList.add('show');
+  }
+
+
+  
+  const FRIEND_QUIPS = {
+    'Charlie': [
+      "Fucking hell, it's Big Chaz! Least it's not one of the Wegtown thugs coming to glass us.",
+      "Oi excuse chubs, Charlie's turned up! Thank Christ, thought we were getting jumped.",
+      "Big Chaz you fat legend! Get over here before Marc or Vincent spots us.",
+      "Charlie mate! Your sweaty arse showing up is the best thing that's happened all trip to Wegtown."
+    ],
+    'Ben': [
+      "It's Ben! Thank fuck, thought we were about to get proper mullered by the Wegtown crew.",
+      "Ben you autistic weapon! Nice to see a friendly face instead of Jude trying to start on us.",
+      "Oh my days, Ben's here. Quick, before Alex or Marc clocks us and it kicks off.",
+      "Ben mate! Least it's you and not one of those proper mental Wegtown bastards."
+    ],
+    'Willy': [
+      "WILLY! You clumsy Swiss-Italian numpty, you actually made it without falling over!",
+      "It's Willy! Thank God, thought we were getting surrounded by Wegtown thugs.",
+      "Willy you Mario Kart Wii disaster! Get in here before Vincent starts swinging.",
+      "Fucking Willy's shown up. Least he's not as dangerous as Marc on a mad one."
+    ],
+    'Francesco': [
+      "Francesco! He's already fucking yapping... but at least he's not a Wegtown thug.",
+      "It's Franky the wannabe American! Nice one mate, better than bumping into Alex.",
+      "Francesco you denial merchant! Bet you're still pretending you're not a proper Yank.",
+      "Oh brilliant, it's Francesco. Least he's only bringing opinions and not a bottle to the head like Vincent."
+    ],
+    '_default': [
+      "Yes! Get in there you beauty!",
+      "Thank fuck for that — thought it was one of the Wegtown weirdos.",
+      "Oi, friendly face! Much better than getting absolutely twatted by Marc.",
+      "Smooth as you like. Dodged the thugs again.",
+      "Oh that was clean! Least it's not Vincent off his nut on speed.",
+      "Proper relief mate. Thought we were in for a proper Wegtown welcome.",
+      "Get in! No drama for once instead of Jude or Alex kicking off.",
+      "That's the one! Beauty. Friendly instead of frightening.",
+      "Mint! Dodged a proper beating there.",
+      "In and out, lovely stuff. No thugs, no tears."
+    ]
+  };
+
+  const HIT_MSGS = [
+    "Ow! Come ON you prick!",
+    "Oh what?! No no no, not now!",
+    "Jesus Christ! Right in the fucking face!",
+    "Oh brilliant. BRILLIANT. Well done everyone.",
+    "Aw mate, what are you DOING?!",
+    "Oh no no no, NOT FUCKING NOW!",
+    "What?! Are you actually KIDDING me?!",
+    "Aw, absolutely done in mate.",
+    "Oh for FUCK'S sake!",
+    "You've proper ruined it now!"
+  ];
+
+  const MARC_HIT_MSGS = [
+    "MARC! What the fuck is he DOING?! Someone drag him off!",
+    "Of course it's fucking Marc again! The absolute weapon!",
+    "MARC! He's lost the plot! Get him away before he kills someone!",
+    "Marc mate, CALM THE FUCK DOWN! CALM DOWN!",
+    "It's Marc sprinting around like a total fucking lunatic!",
+    "Oh my god Marc just absolutely leathered you!",
+    "MARC! He had this planned all along, the sly bastard!"
+  ];
+
+  const MARC_WARNING_MSGS = [
+    "🟠 Oh shit, Marc's clocked you... he looks proper aggro",
+    "🟠 Oi! Marc's spotted us! He’s got that mental look — LEG IT!",
+    "🟠 Fuck. It's Marc. That face means trouble. RUN.",
+    "🟠 Marc incoming — he looks like he’s on one again!",
+    "🟠 Oh no. Marc's found you. He’s absolutely fuming about something!"
+  ];
+
+  const MARC_MAYHEM_MSGS = [
+    "🔴 MARC'S GONE FULL MENTAL — he's just charging about!",
+    "🔴 OH WHAT?! MARC HAS COMPLETELY LOST HIS FUCKING HEAD!",
+    "🔴 MARC MAYHEM! What the actual fuck is he doing?!",
+    "🔴 JESUS CHRIST, MARC'S ON ONE — everyone scatter!"
+  ];
+
+  const REVIVE_MSGS = [
+    "is BACK! YES! Come on you legend!",
+    "has returned! Oh thank fuck for that!",
+    "lives! GET IN! They look confused as hell but they're back!",
+    "is back from the dead! Absolute scenes mate!",
+    "respawned! YES! Let's fucking GO!"
+  ];
+
+  const GAMEOVER_TITLES = [
+    "Oh. Right. Well. That's that then.",
+    "Absolutely fucking done in.",
+    "Oh mate. What a way to go.",
+    "Cornered by the Wegtown lot. Classic.",
+    "Proper mullered. Nice one."
+  ];
+  /* ---------- THEME / ASSETS ---------- */
+  const THEME={
+    p1:{ name:"George",src:"me.png",w:PLAYER_SPRITE,h:PLAYER_SPRITE },
+    p2:{ name:"Meeg",src:"meeg_128.png",w:PLAYER_SPRITE,h:PLAYER_SPRITE },
+    friends:[
+      { name:"Charlie",   src:"friend_charlie_128.png",  w:46,h:46 },
+      { name:"Ben",       src:"friend_ben_128.png",      w:46,h:46 },
+      { name:"Willy",     src:"friend_willy_128.png",    w:46,h:46 },
+      { name:"Francesco", src:"friend_francesco_128.png",w:46,h:46 }
+    ],
+    avoids:[
+      { name:"Marc",    src:"avoid_marc_128.png",    w:58,h:58 },
+      { name:"Jude",    src:"avoid_jude_128.png",    w:58,h:58 },
+      { name:"Vincent", src:"avoid_vincent_128.png", w:58,h:58 },
+      { name:"Alex",    src:"avoid_alex_128.png",    w:58,h:58 }
+    ],
+    background:"Background.png"
+  };
+
+  function loadImage(path){ return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src=path; }); }
+  function initials(name){ return (name||"?").split(/\s+/).map(s=>s[0]||"").join("").slice(0,2).toUpperCase(); }
+  const palette=["#6ec3ff","#8ef0b6","#ffd58a","#ff9aa2","#caa7ff","#9bd1ff","#f7b267","#b8f2e6","#f6c4ff","#caffb9"];
+  function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){ h=((h<<5)-h)+str.charCodeAt(i); h|=0; } return h; }
+
+  async function loadTheme(){
+    async function withImg(o){ const img=o?.src?await loadImage(o.src):null; return {...o,img}; }
+    const [p1,p2,friends,avoids,bg]=await Promise.all([
+      withImg(THEME.p1), withImg(THEME.p2),
+      Promise.all(THEME.friends.map(withImg)),
+      Promise.all(THEME.avoids.map(withImg)),
+      THEME.background?loadImage(THEME.background):Promise.resolve(null)
+    ]);
+    return {p1,p2,friends,avoids,bg};
+  }
+
+  /* ---------- DRAWING HELPERS ---------- */
+  function drawFaceSprite(obj,x,y,w,h){
+    if(obj?.img){ ctx.drawImage(obj.img,x-w/2,y-h/2,w,h); }
+    else{
+      const key=(obj?.name)||"X";
+      const col=palette[Math.abs(hashCode(key))%palette.length];
+      roundedRect(x-w/2,y-h/2,w,h,Math.min(12,w*0.25),col,null);
+      ctx.fillStyle="#081018";
+      ctx.font=`700 ${Math.floor(h*0.36)}px system-ui,-apple-system`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(initials(key),x,y+1);
+    }
+  }
+  function drawPlayer(face,x,y,w,h,glowRGBA,hitFlash,iFrames){
+    if(iFrames>0 && Math.floor(iFrames*9)%2===1){ ctx.globalAlpha=0.22; }
+    const rad=Math.max(w,h)/2+8;
+    const grad=ctx.createRadialGradient(x,y,Math.max(1,rad-6),x,y,rad);
+    grad.addColorStop(0,'rgba(0,0,0,0)'); grad.addColorStop(1,glowRGBA);
+    ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2); ctx.fill();
+    drawFaceSprite(face,x,y,w,h);
+    if(hitFlash>0){
+      const a=Math.min(0.70,hitFlash*1.3);
+      ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,50,50,${a})`; ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  function roundedRect(x,y,w,h,r,fill,stroke){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+    ctx.fillStyle=fill; ctx.fill();
+    if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke(); }
+  }
+
+  /* ---------- MARC MAYHEM TIMER (drawn on canvas) ---------- */
+  function drawMayhemTimer(){
+    if(!isMarcMayhem()) return;
+    const cyclePos=(elapsed-MAYHEM_FIRST)%MAYHEM_CYCLE;
+    const remaining=Math.max(0,MAYHEM_DURATION-cyclePos);
+    const progress=remaining/MAYHEM_DURATION;
+    const cx=S.w/2, cy=S.h/2-20;
+    const r=30;
+
+    ctx.save();
+    ctx.globalAlpha=0.88;
+
+    // Dark background disc
+    ctx.beginPath(); ctx.arc(cx,cy,r+7,0,Math.PI*2);
+    ctx.fillStyle='rgba(18,0,0,0.78)'; ctx.fill();
+
+    // Dim full ring
+    ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2);
+    ctx.strokeStyle='rgba(255,59,48,0.20)'; ctx.lineWidth=5; ctx.stroke();
+
+    // Live countdown arc
+    if(progress>0){
+      ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+progress*Math.PI*2);
+      const urgency=remaining<=3?'#ff4040':remaining<=6?'#ff6030':'#ff3b30';
+      ctx.strokeStyle=urgency; ctx.lineWidth=5; ctx.stroke();
+    }
+
+    // Number
+    ctx.globalAlpha=1;
+    ctx.font=`bold 22px system-ui,-apple-system,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle=remaining<=3?'#ff8080':'#ffcaca';
+    ctx.fillText(Math.ceil(remaining),cx,cy);
+
+    // "MARC" label below
+    ctx.font=`bold 10px system-ui,-apple-system,sans-serif`;
+    ctx.fillStyle='rgba(255,100,100,0.7)';
+    ctx.fillText('MARC',cx,cy+18);
+
+    ctx.restore();
+  }
+
+  /* ---------- REVIVE PROGRESS ---------- */
+  function drawReviveProgress(){
+    if(!reviveTarget||!SPRITES) return;
+    const n=allFriendNames.length;
+    const spacing=32, total=n*spacing;
+    const startX=S.w/2-total/2+spacing/2;
+    const y=S.h-26;
+
+    ctx.save();
+    roundedRect(startX-22,y-18,total+12,30,8,'rgba(0,0,0,0.6)',null);
+
+    for(let i=0;i<n;i++){
+      const name=allFriendNames[i];
+      const got=reviveProgress.has(name);
+      const spr=SPRITES.friends.find(f=>f.name===name);
+      const cx=startX+i*spacing;
+      ctx.globalAlpha=got?1:0.28;
+      if(spr) drawFaceSprite(spr,cx,y,22,22);
+      if(got){
+        ctx.globalAlpha=1; ctx.strokeStyle='#45f0b0'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(cx,y,13,0,Math.PI*2); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(255,255,255,0.55)';
+    ctx.font='10px system-ui,-apple-system';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('collect all to revive',S.w/2,y-26);
+    ctx.restore();
+  }
+
+  /* ---------- GAME STATE ---------- */
+  const S={ w:480, h:640,
+    p1:{ x:160,y:520,r:PLAYER_RADIUS,speed:PLAYER_SPEED,active:true, lives:INITIAL_LIVES,score:0,hitFlash:0,iFrames:0 },
+    p2:{ x:320,y:520,r:PLAYER_RADIUS,speed:PLAYER_SPEED,active:false,lives:INITIAL_LIVES,score:0,hitFlash:0,iFrames:0 },
+    friends:[],avoids:[],friendT:0,avoidT:0
+  };
+  let NUM_PLAYERS=1;
+  let best=Number(localStorage.getItem('wegtown_best_sum')||0);
+  let friendsCount=0,elapsed=0,difficulty=1;
+  let raf=0,last=0,t=0;
+  let reviveTarget=null,reviveProgress=new Set(),allFriendNames=[];
+  let lastBannerState='none';
+
+  const keys=Object.create(null);
+  const pointer={active:false,x:0,y:0};
+
+  function mapPointer(e){
+    const r=canvas.getBoundingClientRect();
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    pointer.x=cx*(S.w/r.width); pointer.y=cy*(S.h/r.height);
+  }
+  window.addEventListener('pointerdown',e=>{ mapPointer(e); pointer.active=true; });
+  window.addEventListener('pointermove',e=>{ if(pointer.active) mapPointer(e); });
+  window.addEventListener('pointerup',()=>pointer.active=false);
+  window.addEventListener('touchend',()=>pointer.active=false,{passive:true});
+  window.addEventListener('keydown',e=>{
+    const k=e.key.toLowerCase();
+    if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)) e.preventDefault();
+    keys[k]=true; if(k==='p') togglePause();
+  },{passive:false});
+  window.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; },{passive:false});
+  pauseBtn.addEventListener('click',()=>togglePause());
+  restartBtn.addEventListener('click',()=>start());
+
+  /* ---------- OVERLAYS ---------- */
+  function hideOverlay(){ overlay.hidden=true; overlay.style.display='none'; panel.innerHTML=''; }
+  function showOverlay(html){ overlay.hidden=false; overlay.style.display='grid'; panel.innerHTML=html; }
+
+  function showStart(){
+    showOverlay(
+      '<h1>George in WegTown II</h1>'+
+      '<div class="muted">'+
+        'George is late. WegTown is absolutely heaving. Off you go.<br><br>'+
+        '<b>Collect friends</b> → +'+FRIEND_SCORE+' points <i>and</i> +1 ❤︎ (up to '+MAX_LIVES+'). '+
+        '<b>Dodge everyone else</b> or lose a heart.<br>'+
+        '<b>1P:</b> Arrow keys or mouse. &nbsp;<b>2P:</b> Arrows (George) + WASD (Meeg).<br>'+
+        'In 2P, collect one of each friend to bring your mate back from the void.<br><br>'+
+        'Every 30 seconds: <b>MARC MAYHEM</b>. 5-second warning first. Timer appears on screen. '+
+        'He\'s going to be absolutely mental regardless.'+
+      '</div>'+
+      '<div class="buttons">'+
+        '<button class="primary" id="start1" disabled>Solo Dash (loading…)</button>'+
+        '<button class="secondary" id="start2" disabled>Chaotic Duo (loading…)</button>'+
+      '</div>'
+    );
+    themeLoad.then(()=>{
+      const b1=panel.querySelector('#start1'),b2=panel.querySelector('#start2');
+      if(b1){ b1.textContent='Solo Dash (1 Player)'; b1.disabled=false; }
+      if(b2){ b2.textContent='Chaotic Duo (2 Players)'; b2.disabled=false; }
+    });
+    panel.querySelector('#start1').addEventListener('click',async e=>{ e.preventDefault(); NUM_PLAYERS=1; await start(); },{once:true});
+    panel.querySelector('#start2').addEventListener('click',async e=>{ e.preventDefault(); NUM_PLAYERS=2; await start(); },{once:true});
+  }
+  function showPaused(){
+    showOverlay(
+      '<h1>Tea break.</h1>'+
+      '<div class="muted">Right. Fine. Have a biscuit.<br>'+
+        'WegTown will still be heaving when you get back. Marc is literally just standing there.<br>'+
+        'He\'s got a coffee. He looks patient. He is absolutely not patient.</div>'+
+      '<div class="buttons">'+
+        '<button class="primary" id="resumeBtn">Back at it</button>'+
+        '<button class="secondary" id="quitBtn">Absolutely not</button>'+
+      '</div>'
+    );
+    panel.querySelector('#resumeBtn').addEventListener('click',e=>{ e.preventDefault(); togglePause(); },{once:true});
+    panel.querySelector('#quitBtn').addEventListener('click',e=>{ e.preventDefault(); quitToStart(); },{once:true});
+  }
+  function showGameOver(){
+    const total=S.p1.score+(NUM_PLAYERS===2?S.p2.score:0);
+    const isNewBest=total>best;
+    const p2bit=NUM_PLAYERS===2?` &nbsp;|&nbsp; P2: <b>${S.p2.score}</b>`:'';
+    showOverlay(
+      `<h1>${pick(GAMEOVER_TITLES)}</h1>`+
+      '<div class="muted">'+
+        `P1: <b>${S.p1.score}</b>${p2bit}<br>`+
+        `Total: <b>${total}</b> — Best: <b>${Math.max(best,total)}</b>${isNewBest?' 🏆 New record!':''}<br>`+
+        `Time: <b>${fmtTime(elapsed)}</b>`+
+      '</div>'+
+      '<div class="buttons">'+
+        '<button class="primary" id="againBtn">One more dash</button>'+
+        '<button class="secondary" id="quitBtn">Quit to Start</button>'+
+      '</div>'
+    );
+    panel.querySelector('#againBtn').addEventListener('click',async e=>{ e.preventDefault(); await start(); },{once:true});
+    panel.querySelector('#quitBtn').addEventListener('click',e=>{ e.preventDefault(); quitToStart(); },{once:true});
+  }
+
+  function togglePause(){
+    if(!running||gameOver) return;
+    paused=!paused;
+    if(paused){ bgm.pause(); showPaused(); cancelAnimationFrame(raf); }
+    else{ hideOverlay(); bgm.play().catch(()=>{}); last=performance.now(); raf=requestAnimationFrame(loop); }
+  }
+  function quitToStart(){
+    running=false; paused=false; gameOver=false;
+    cancelAnimationFrame(raf); bgm.pause(); showStart();
+  }
+
+  /* ---------- ASSETS ---------- */
+  let SPRITES=null,BG=null;
+  const themeLoad=loadTheme().then(s=>{
+    SPRITES=s; BG=s.bg; bestChip.textContent=best;
+    allFriendNames=[...new Set(s.friends.map(f=>f.name||"Friend"))];
+  }).finally(()=>showStart());
+
+  /* ---------- FLOW ---------- */
+  async function start(){
+    await themeLoad;
+    running=true; paused=false; gameOver=false;
+    friendsCount=0; elapsed=0; difficulty=1;
+    reviveTarget=null; reviveProgress.clear();
+    shakeTime=0; particles.length=0; lastBannerState='none';
+    banner.className='banner';
+
+    S.p1={ x:S.w*0.33,y:S.h-110,r:PLAYER_RADIUS,speed:PLAYER_SPEED,active:true, lives:INITIAL_LIVES,score:0,hitFlash:0,iFrames:0 };
+    S.p2={ x:S.w*0.66,y:S.h-110,r:PLAYER_RADIUS,speed:PLAYER_SPEED,active:(NUM_PLAYERS===2),lives:INITIAL_LIVES,score:0,hitFlash:0,iFrames:0 };
+    p2ScoreWrap.style.display=NUM_PLAYERS===2?'':'none';
+    p2LivesWrap.style.display=NUM_PLAYERS===2?'':'none';
+
+    S.friends.length=0; S.avoids.length=0; S.friendT=0; S.avoidT=0;
+    updateHud(); hideOverlay(); last=performance.now(); t=0;
+    bgm.currentTime=0; bgm.play().catch(()=>{});
+    cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
+  }
+  function end(){
+    running=false; paused=false; gameOver=true;
+    cancelAnimationFrame(raf); bgm.pause(); SFX.gameOver();
+    const total=S.p1.score+(NUM_PLAYERS===2?S.p2.score:0);
+    best=Math.max(best,total);
+    localStorage.setItem('wegtown_best_sum',String(best));
+    updateHud(); showGameOver();
+  }
+
+  /* ---------- LOOP ---------- */
+  function loop(ts){
+    const dt=Math.min(0.033,(ts-last)/1000); last=ts; t+=dt;
+    update(dt); draw();
+    if(running&&!paused) raf=requestAnimationFrame(loop);
+  }
+
+  function update(dt){
+    if(paused) return;
+    difficulty=Math.min(DIFFICULTY_MAX,difficulty+dt*DIFFICULTY_RATE);
+    elapsed+=dt;
+    if(S.p1.hitFlash>0) S.p1.hitFlash=Math.max(0,S.p1.hitFlash-dt);
+    if(S.p2.hitFlash>0) S.p2.hitFlash=Math.max(0,S.p2.hitFlash-dt);
+    if(S.p1.iFrames>0)  S.p1.iFrames=Math.max(0,S.p1.iFrames-dt);
+    if(S.p2.iFrames>0)  S.p2.iFrames=Math.max(0,S.p2.iFrames-dt);
+    if(shakeTime>0)     shakeTime=Math.max(0,shakeTime-dt);
+    movePlayers(dt); spawnThings(dt); updateFriends(dt); updateAvoids(dt); updateParticles(dt);
+    if(NUM_PLAYERS===1){ if(!S.p1.active){ end(); return; } }
+    else if(!S.p1.active&&!S.p2.active){ end(); return; }
+    updateHud(); updateBanner();
+  }
+
+  function movePlayers(dt){
+    if(S.p1.active){
+      let vx=0,vy=0;
+      if(keys['arrowleft'])  vx-=1;
+      if(keys['arrowright']) vx+=1;
+      if(keys['arrowup'])    vy-=1;
+      if(keys['arrowdown'])  vy+=1;
+      if(NUM_PLAYERS===1&&pointer.active){
+        const dx=pointer.x-S.p1.x,dy=pointer.y-S.p1.y,L=Math.hypot(dx,dy)||1;
+        vx=(dx/L)*1.6; vy=(dy/L)*1.6;
+      }
+      S.p1.x=clamp(S.p1.x+vx*S.p1.speed*dt,S.p1.r,S.w-S.p1.r);
+      S.p1.y=clamp(S.p1.y+vy*S.p1.speed*dt,S.p1.r+60,S.h-S.p1.r);
+    }
+    if(S.p2.active){
+      let vx=0,vy=0;
+      if(keys['a']) vx-=1; if(keys['d']) vx+=1;
+      if(keys['w']) vy-=1; if(keys['s']) vy+=1;
+      S.p2.x=clamp(S.p2.x+vx*S.p2.speed*dt,S.p2.r,S.w-S.p2.r);
+      S.p2.y=clamp(S.p2.y+vy*S.p2.speed*dt,S.p2.r+60,S.h-S.p2.r);
+    }
+  }
+
+  function spawnThings(dt){
+    S.friendT-=dt; S.avoidT-=dt;
+    if(S.friendT<=0){
+      S.friendT=(0.9+Math.random()*0.7)/difficulty;
+      const f=SPRITES.friends[Math.floor(Math.random()*SPRITES.friends.length)];
+      const r=14;
+      S.friends.push({kind:f,x:rand(r,S.w-r),y:-r,r,vy:rand(60,110)*difficulty});
+    }
+    if(S.avoidT<=0){
+      S.avoidT=(0.8+Math.random()*0.5)/difficulty;
+      const av=SPRITES.avoids[Math.floor(Math.random()*SPRITES.avoids.length)];
+      const w=av.w||56,h=av.h||56;
+      let vy=rand(90,160)*difficulty,vx=rand(-30,30);
+      if((av.name||'').toLowerCase()==='marc'){ vy*=MARC_SPEED_MULT; vx*=MARC_SPEED_MULT; }
+      S.avoids.push({kind:av,x:rand(0,S.w-w),y:-h,w,h,vy,vx});
+    }
+  }
+
+  function updateFriends(dt){
+    for(let i=S.friends.length-1;i>=0;i--){
+      const f=S.friends[i]; f.y+=f.vy*dt;
+      if(f.y-f.r>S.h+12){ S.friends.splice(i,1); continue; }
+      if(S.p1.active&&circleCircleHit(S.p1.x,S.p1.y,S.p1.r,f.x,f.y,f.r)){
+        const {x:fx,y:fy}=f; S.friends.splice(i,1); S.p1.score+=FRIEND_SCORE; friendsCount++;
+        onFriendCollected('p1',f.kind.name||'Friend',fx,fy); continue;
+      }
+      if(S.p2.active&&circleCircleHit(S.p2.x,S.p2.y,S.p2.r,f.x,f.y,f.r)){
+        const {x:fx,y:fy}=f; S.friends.splice(i,1); S.p2.score+=FRIEND_SCORE; friendsCount++;
+        onFriendCollected('p2',f.kind.name||'Friend',fx,fy); continue;
+      }
+    }
+  }
+
+  function onFriendCollected(by,fname,fx,fy){
+    const P=S[by];
+    SFX.collect();
+    addFloater(fx+14,fy,'+'+FRIEND_SCORE,'#ffd978');
+    if(P.lives<MAX_LIVES){
+      P.lives++; SFX.lifeGain();
+      addFloater(fx-14,fy-28,'+1 ❤︎','#ff7096');
+    }
+    const quips=FRIEND_QUIPS[fname]||FRIEND_QUIPS['_default'];
+    toastMsg('🫶 '+fname+' — '+pick(quips));
+    if(reviveTarget&&((by==='p1'&&!S.p2.active)||(by==='p2'&&!S.p1.active))){
+      reviveProgress.add(fname);
+      if(allFriendNames.every(n=>reviveProgress.has(n))){
+        const who=reviveTarget; reviveTarget=null; reviveProgress.clear();
+        const RP=S[who]; RP.active=true; RP.lives=INITIAL_LIVES; RP.hitFlash=0; RP.iFrames=0;
+        RP.x=who==='p1'?S.w*0.33:S.w*0.66; RP.y=S.h-110;
+        SFX.revive();
+        toastMsg('🔔 '+(who==='p1'?'George':'Meeg')+' '+pick(REVIVE_MSGS));
+      }
+    }
+  }
+
+  function updateAvoids(dt){
+    const mayhem=isMarcMayhem(), TOP=34;
+    for(let i=S.avoids.length-1;i>=0;i--){
+      const a=S.avoids[i];
+      const isMarc=(a.kind.name||'').toLowerCase()==='marc';
+      if(mayhem&&isMarc){
+        if(!a._angle) a._angle=Math.random()*Math.PI*2;
+        a._angle+=(Math.random()-0.5)*0.4;
+        if(Math.abs(Math.sin(a._angle))<0.25) a._angle+=(Math.random()<0.5?1:-1)*0.45;
+        const speed=MARC_MAYHEM_SPEED*Math.max(1,difficulty);
+        a.vx=Math.cos(a._angle)*speed; a.vy=Math.sin(a._angle)*speed;
+        a.x+=a.vx*dt; a.y+=a.vy*dt;
+        if(a.x<-a.w*0.25){ a.x=-a.w*0.25; a._angle=Math.PI-a._angle; }
+        if(a.x>S.w-a.w*0.75){ a.x=S.w-a.w*0.75; a._angle=Math.PI-a._angle; }
+        if(a.y<TOP){ a.y=TOP; a._angle=-a._angle; }
+        if(a.y>S.h-a.h*0.5){ a.y=S.h-a.h*0.5; a._angle=-a._angle; }
+      } else {
+        a.y+=a.vy*dt; a.x+=a.vx*dt*0.5;
+      }
+      if(a.y>S.h+40||a.x<-a.w-20||a.x>S.w+a.w+20){ S.avoids.splice(i,1); continue; }
+      if(S.p1.active&&S.p1.iFrames<=0&&circleRectHit(S.p1.x,S.p1.y,S.p1.r,a.x,a.y,a.w,a.h)){
+        onHit('p1',isMarc,a.x+a.w/2,a.y+a.h/2); S.avoids.splice(i,1); continue;
+      }
+      if(S.p2.active&&S.p2.iFrames<=0&&circleRectHit(S.p2.x,S.p2.y,S.p2.r,a.x,a.y,a.w,a.h)){
+        onHit('p2',isMarc,a.x+a.w/2,a.y+a.h/2); S.avoids.splice(i,1); continue;
+      }
+    }
+  }
+
+  function onHit(who,isMarc,hx,hy){
+    const P=S[who]; if(!P.active) return;
+    P.lives--; P.hitFlash=0.55; P.iFrames=IFRAMES_DURATION;
+    triggerShake(); SFX.hit();
+    addFloater(hx??P.x,hy??P.y-20,'-1 ❤︎','#ff4444');
+    const name=who==='p1'?'George':'Meeg';
+    const msg=isMarc?pick(MARC_HIT_MSGS):pick(HIT_MSGS);
+    toastMsg('💥 '+name+' — '+msg+' ('+Math.max(0,P.lives)+' hearts left)');
+    if(P.lives<=0){
+      P.active=false;
+      if(NUM_PLAYERS===1){
+        toastMsg('Oh no. All hearts gone. Game over. Right. That\'s that.');
+      } else {
+        reviveTarget=who; reviveProgress.clear();
+        const other=who==='p1'?'Meeg':'George';
+        toastMsg(other+' needs one of each friend to bring '+name+' back!');
+      }
+    }
+  }
+
+  /* ---------- MARC MAYHEM ---------- */
+  function isMarcMayhem(){
+    if(elapsed<MAYHEM_FIRST) return false;
+    return (elapsed-MAYHEM_FIRST)%MAYHEM_CYCLE<MAYHEM_DURATION;
+  }
+  function isMarcWarning(){
+    if(isMarcMayhem()) return false;
+    if(elapsed<MAYHEM_FIRST-WARNING_BEFORE) return false;
+    if(elapsed<MAYHEM_FIRST) return true;
+    return (elapsed-MAYHEM_FIRST)%MAYHEM_CYCLE>=(MAYHEM_CYCLE-WARNING_BEFORE);
+  }
+  function updateBanner(){
+    const mayhem=isMarcMayhem(),warn=isMarcWarning();
+    const state=mayhem?'mayhem':warn?'warning':'none';
+    if(state!==lastBannerState){
+      if(state==='mayhem'){ SFX.mayhemStart(); banner.textContent=pick(MARC_MAYHEM_MSGS); }
+      else if(state==='warning'){ SFX.warning(); banner.textContent=pick(MARC_WARNING_MSGS); }
+      lastBannerState=state;
+    }
+    banner.className=state==='none'?'banner':'banner show '+state;
+  }
+
+  /* ---------- HUD ---------- */
+  function updateHud(){
+    timeChip.textContent=fmtTime(elapsed);
+    p1ScoreEl.textContent=S.p1.score;
+    p1LivesEl.textContent='❤︎'.repeat(Math.max(0,S.p1.lives));
+    if(NUM_PLAYERS===2){
+      p2ScoreEl.textContent=S.p2.score;
+      p2LivesEl.textContent='❤︎'.repeat(Math.max(0,S.p2.lives));
+    }
+    bestChip.textContent=Math.max(best,S.p1.score+(NUM_PLAYERS===2?S.p2.score:0));
+  }
+
+  /* ---------- DRAW ---------- */
+  function draw(){
+    const w=S.w,h=S.h;
+    ctx.clearRect(0,0,w,h);
+    const sx=shakeTime>0?(Math.random()-0.5)*9:0;
+    const sy=shakeTime>0?(Math.random()-0.5)*9:0;
+    ctx.save(); ctx.translate(sx,sy);
+
+    // Background
+    if(BG&&BG.width&&BG.height){
+      const scale=Math.max(w/BG.width,h/BG.height);
+      const dw=BG.width*scale,dh=BG.height*scale;
+      ctx.drawImage(BG,(w-dw)/2,(h-dh)/2,dw,dh);
+      ctx.fillStyle='rgba(0,0,0,0.24)'; ctx.fillRect(0,0,w,h);
+    } else {
+      const g=ctx.createLinearGradient(0,0,0,h);
+      g.addColorStop(0,'#0f172a'); g.addColorStop(1,'#1f2937');
+      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    }
+
+    // Friends
+    for(const f of S.friends) drawFaceSprite(f.kind,f.x,f.y,f.kind.w||38,f.kind.h||38);
+
+    // Enemies (Marc glows red during mayhem)
+    const mayhem=isMarcMayhem();
+    for(const a of S.avoids){
+      const isMarc=(a.kind.name||'').toLowerCase()==='marc';
+      const cx=a.x+a.w/2,cy=a.y+a.h/2;
+      if(mayhem&&isMarc){
+        const gr=a.w/2+14,pulse=0.28+0.24*Math.sin(t*11);
+        const mg=ctx.createRadialGradient(cx,cy,0,cx,cy,gr);
+        mg.addColorStop(0,`rgba(255,50,50,${pulse})`); mg.addColorStop(1,'rgba(255,0,0,0)');
+        ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(cx,cy,gr,0,Math.PI*2); ctx.fill();
+      }
+      drawFaceSprite(a.kind,cx,cy,a.w,a.h);
+    }
+
+    // Players
+    const P1GLOW='rgba(0,255,160,0.45)',P2GLOW='rgba(170,120,255,0.45)';
+    if(S.p1.active) drawPlayer(SPRITES.p1||SPRITES.p2,S.p1.x,S.p1.y,
+      SPRITES.p1?.w||PLAYER_SPRITE,SPRITES.p1?.h||PLAYER_SPRITE,P1GLOW,S.p1.hitFlash,S.p1.iFrames);
+    if(S.p2.active){
+      const face=(SPRITES.p2&&(SPRITES.p2.img||SPRITES.p2.name))?SPRITES.p2:(SPRITES.p1||SPRITES.p2);
+      drawPlayer(face,S.p2.x,S.p2.y,face.w||PLAYER_SPRITE,face.h||PLAYER_SPRITE,P2GLOW,S.p2.hitFlash,S.p2.iFrames);
+    }
+
+    // Marc timer + revive UI + particles
+    drawMayhemTimer();
+    drawReviveProgress();
+    drawParticles();
+    ctx.restore();
+  }
+
+  /* ---------- HELPERS ---------- */
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  function circleRectHit(cx,cy,r,rx,ry,rw,rh){
+    const nx=Math.max(rx,Math.min(rx+rw,cx)),ny=Math.max(ry,Math.min(ry+rh,cy));
+    return (cx-nx)**2+(cy-ny)**2<=r*r;
+  }
+  function circleCircleHit(x1,y1,r1,x2,y2,r2){
+    return (x1-x2)**2+(y1-y2)**2<=(r1+r2)**2;
+  }
+  function fmtTime(s){ const m=Math.floor(s/60),ss=Math.floor(s%60); return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`; }
+
+  let running=false,paused=false,gameOver=false;
+})();
+</script>
+</body>
+</html>
