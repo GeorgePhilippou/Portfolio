@@ -4,86 +4,78 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>George Philippou — Projects Built with AI</title>
-<meta name="description" content="A portfolio of educational sites, games, tools and websites built with AI.">
+<meta name="description" content="A portfolio of educational sites, games, tools and websites built with Claude and ChatGPT.">
 <style>
-:root{--bg:#fbfaf7;--card:#fff;--ink:#1c1b19;--muted:#6b675f;--line:#e6e2d9;--accent:#b8532f;--chip:#f1ede4;
---c-learn:#c98a2b;--c-tools:#2b9c8f;--c-games:#8a63d2;--c-business:#d04a4a}
-@media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1d1b;--ink:#f1eee8;--muted:#a09b90;--line:#2e2c28;--accent:#e08a66;--chip:#2a2825}}
+:root{--bg:#faf8f4;--card:#fff;--ink:#1f1d1a;--muted:#6d685f;--line:#e8e3d9;--accent:#b8532f;--chip:#f2eee6;--shadow:0 1px 2px rgba(40,30,10,.05),0 8px 24px rgba(40,30,10,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#131312;--card:#1c1b19;--ink:#f2efe9;--muted:#a29d92;--line:#2d2b27;--accent:#e58f6b;--chip:#272522;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;display:flex;flex-direction:column;min-height:100dvh}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
 a{color:inherit}
-.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;padding:14px 20px 10px}
-.top h1{font:600 clamp(22px,3vw,30px)/1.1 Georgia,"Source Serif 4",serif;margin:0}
-.top .eyebrow{margin:0 0 2px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
-.top p.lede{margin:4px 0 0;font-size:13px;color:var(--muted);max-width:640px}
-.filters{display:flex;flex-wrap:wrap;gap:6px}
-.filters button{font:inherit;font-size:13px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px}
-.filters button i{width:8px;height:8px;border-radius:50%;background:var(--dot,var(--muted))}
-.filters button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:600}
-main{flex:1;min-height:0;padding:0 20px 10px;display:grid;gap:10px;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}
-.tile{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);padding:0;cursor:pointer;text-align:left;color:var(--ink);font:inherit;display:flex;flex-direction:column;transition:transform .15s,opacity .2s,box-shadow .15s}
-.tile:hover,.tile:focus-visible{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.28);outline:none}
-.tile img{flex:0 0 52%;width:100%;min-height:0;object-fit:cover;object-position:top;border-bottom:1px solid var(--line)}
-
-.tile .cat{position:absolute;top:10px;left:10px;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--cc);color:#fff}
-.tile .txt{padding:10px 12px 12px;flex:1;min-height:0;overflow:hidden}
-.tile h2{margin:0 0 3px;font-size:16px;line-height:1.2}
-.tile p{margin:0;font-size:12px;line-height:1.4;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
-.tile .ai{display:block;margin-top:4px;font-size:11px;color:var(--accent);font-weight:600}
-.tile.dim{opacity:.22;filter:grayscale(.6)}
-footer{padding:4px 20px 12px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 18px;justify-content:space-between}
-footer a{color:var(--accent);font-weight:600;text-decoration:none}
-dialog{border:1px solid var(--line);border-radius:16px;padding:0;width:min(560px,92vw);background:var(--card);color:var(--ink);overflow:hidden}
-dialog::backdrop{background:rgba(0,0,0,.55)}
-dialog img{width:100%;aspect-ratio:16/8;object-fit:cover;object-position:top;display:block;border-bottom:1px solid var(--line)}
-.dbody{padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px}
-.dbody .dcat{font-size:12px;font-weight:600;color:var(--cc)}
-.dbody h3{margin:0;font:600 22px Georgia,serif}
-.dbody p{margin:0;color:var(--muted)}
-.dbody .note{font-style:italic;font-size:13px}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tags span{font-size:12px;background:var(--chip);border-radius:6px;padding:2px 8px;color:var(--muted)}
-.links{display:flex;gap:16px;font-weight:600}
+.wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:56px}
+.bar b{font:600 16px Georgia,serif}
+.bar nav{display:flex;gap:4px;flex-wrap:wrap}
+.bar nav a{text-decoration:none;font-size:14px;color:var(--muted);padding:6px 12px;border-radius:999px}
+.bar nav a:hover{background:var(--chip);color:var(--ink)}
+header{padding:72px 0 40px}
+header .eyebrow{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font:600 clamp(36px,5.5vw,60px)/1.08 Georgia,"Source Serif 4",serif;margin:0 0 20px;letter-spacing:-.01em}
+header p.lede{margin:0;max-width:600px;font-size:19px;color:var(--muted)}
+section{padding:40px 0 16px}
+.head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.head h2{font:600 28px Georgia,serif;margin:0}
+.head .n{font-size:13px;color:var(--muted)}
+section>p.sub{margin:0 0 28px;color:var(--muted);max-width:640px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.duo .grid{grid-template-columns:1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translateY(-3px)}
+.card img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block;border-bottom:1px solid var(--line)}
+.body{padding:22px 22px 24px;display:flex;flex-direction:column;gap:12px;flex:1}
+.body h3{margin:0;font-size:19px;line-height:1.3}
+.body p{margin:0;color:var(--muted);font-size:15px;line-height:1.65}
+.body p.note{font-size:13.5px;font-style:italic}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:4px}
+.tags span{font-size:12.5px;background:var(--chip);border-radius:999px;padding:3px 11px;color:var(--muted)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;font-weight:600;font-size:15px}
 .links a{color:var(--accent);text-decoration:none}
 .links a:hover{text-decoration:underline}
-.close{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:18px;cursor:pointer}
-@media (max-width:1100px){main{grid-template-columns:repeat(3,1fr);grid-template-rows:none;grid-auto-rows:260px}}
-@media (max-width:700px){main{grid-template-columns:repeat(2,1fr);grid-auto-rows:230px}}
-@media (max-width:440px){main{grid-template-columns:1fr}}
-@media (min-width:1101px) and (max-height:560px){main{grid-template-rows:none;grid-auto-rows:240px}}
+footer{margin-top:56px;border-top:1px solid var(--line);padding:40px 0 56px;color:var(--muted)}
+footer p{margin:0;max-width:640px}
+footer a{color:var(--accent);font-weight:600;text-decoration:none}
+@media (max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}.duo{grid-template-columns:1fr;gap:0}.duo .grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.wrap{padding:0 20px}.grid,.duo .grid{grid-template-columns:1fr}.bar nav{display:none}header{padding:48px 0 24px}}
 </style>
 </head>
 <body>
-<header class="top">
-  <div>
-    <p class="eyebrow">George Philippou</p>
-    <h1>Things I've built with AI</h1>
-    <p class="lede">Made in collaboration with Claude and ChatGPT. I set the direction, check the facts and test the results. Click any project for details.</p>
-  </div>
-  <div class="filters" id="filters" role="group" aria-label="Filter projects"></div>
+<div class="bar"><div class="wrap"><b>George Philippou</b>
+<nav><a href="#learn">Learning</a><a href="#games">Games</a><a href="#tools">Tools</a><a href="#business">Websites</a><a href="#about">About</a></nav></div></div>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Portfolio</p>
+  <h1>Things I've built with AI</h1>
+  <p class="lede">Every project here was built in collaboration with Claude and ChatGPT. I set the direction, check the facts and test the results.</p>
 </header>
-<main id="grid"></main>
-<footer>
-  <span><b style="color:var(--ink)">About.</b> I'm George Philippou. I use AI (Claude and ChatGPT) to build the projects on this page, choosing what gets built, checking the facts, testing the results and fixing what breaks. <a href="https://github.com/GeorgePhilippou">GitHub profile</a></span>
-</footer>
-<dialog id="dlg"><button class="close" aria-label="Close" id="dclose">×</button><div id="dcontent"></div></dialog>
+<div id="root"></div>
+</div>
+<footer id="about"><div class="wrap"><p>I'm George Philippou. I use AI to build the projects on this page, choosing what gets built, checking the facts, testing the results and fixing what breaks.</p><p style="margin-top:14px"><a href="https://github.com/GeorgePhilippou">GitHub profile ↗</a></p></div></footer>
 <script>
-const ITEMS=[{"cat": "learn", "catName": "Learning & reference", "title": "Hellenika", "img": "img/hellenika.jpg", "alt": "Hellenika home page", "desc": "An interactive atlas of the Ancient Greek world, 3200–30 BC. 400+ connected entities on a timeline and map, with guided journeys. Every claim is tagged with the kind of evidence behind it and how confident we can be.", "tags": ["Vanilla JS", "PWA", "Canvas maps"], "note": "", "links": [["https://georgephilippou.github.io/Hellenika/", "Open"], ["https://github.com/GeorgePhilippou/Hellenika", "Code"]], "short": "Hellenika", "ai": ["Claude", "ChatGPT"]}, {"cat": "learn", "catName": "Learning & reference", "title": "Dinosauria", "img": "img/dinosauria.jpg", "alt": "Dinosauria home page", "desc": "An open scientific reference wiki with 328 dinosaur and early-bird profiles, combining the Natural History Museum's Dino Directory, the Paleobiology Database and the published literature.", "tags": ["JavaScript", "Open data", "Scientific review"], "note": "", "links": [["https://georgephilippou.github.io/Dinosauria/", "Open"], ["https://github.com/GeorgePhilippou/Dinosauria", "Code"]], "short": "Dinosauria", "ai": ["Claude"]}, {"cat": "learn", "catName": "Learning & reference", "title": "Human Evolution Booklet", "img": "img/booklet.jpg", "alt": "Cover and first page of the Human Evolution Booklet", "desc": "A 64-page illustrated booklet on the evidence for human evolution. Built with a Python and HTML pipeline, with an automatic layout checker and every new fact verified against DOIs.", "tags": ["Python", "Typesetting", "Custom figures"], "note": "Print project, not online.", "links": [], "short": "Human Evolution Booklet", "ai": ["Claude", "ChatGPT"]}, {"cat": "learn", "catName": "Learning & reference", "title": "Signals & Systems Lab", "img": "img/signals.jpg", "alt": "Signals Lab home page", "desc": "A local-first teaching tool that links the maths, plots and physical intuition for signals and systems, with an accessible data table behind every plot.", "tags": ["TypeScript", "Education", "Accessibility"], "note": "In development.", "links": [], "short": "Signals Lab", "ai": []}, {"cat": "tools", "catName": "Everyday tools", "title": "TripMap", "img": "img/tripmap.jpg", "alt": "TripMap", "desc": "A mobile-first trip planner. Collect places on a map, build day-by-day itineraries and plan together with another traveller in real time. Works offline.", "tags": ["Leaflet", "PWA", "Firebase"], "note": "", "links": [["https://georgephilippou.github.io/TripMap/", "Open"], ["https://github.com/GeorgePhilippou/TripMap", "Code"]], "short": "TripMap", "ai": []}, {"cat": "tools", "catName": "Everyday tools", "title": "HAL — voice assistant", "img": "img/hal.jpg", "alt": "HAL: a black monolith-style box with a glowing OLED eye and speaker vents", "desc": "A home-built voice assistant on a Raspberry Pi 5, in a hand-built black monolith case inspired by 2001: A Space Odyssey, with a HAL-9000-style eye on an OLED screen. It listens for a wake word, transcribes speech locally, replies through Claude and starts speaking before the answer is finished. It has an iPhone companion app, long-term memory per person, timers and music, and over 12,000 lines of Python with automated tests.", "tags": ["Python", "Raspberry Pi", "Whisper", "Claude API", "Piper TTS"], "note": "Runs on my home network, so there's no public demo.", "links": [], "short": "HAL", "ai": ["Claude", "ChatGPT"]}, {"cat": "games", "catName": "Games", "title": "Dots & Boxes", "img": "img/dots.jpg", "alt": "Dots and Boxes start screen", "desc": "The classic pen-and-paper game, designed for Apple Pencil. Play two players, against the computer, or across two iPads online.", "tags": ["PWA", "Firebase", "Online multiplayer"], "note": "", "links": [["https://georgephilippou.github.io/dots-and-boxes/", "Play"], ["https://github.com/GeorgePhilippou/dots-and-boxes", "Code"]], "short": "Dots & Boxes", "ai": ["ChatGPT"]}, {"cat": "games", "catName": "Games", "title": "Mosaic Mates", "img": "img/mosaic.jpg", "alt": "Mosaic Mates menu", "desc": "An original block-placement puzzle for two. Solo, shared-board and score-race modes, with private online rooms and drag-and-drop play.", "tags": ["PWA", "Firebase", "Real-time sync"], "note": "", "links": [["https://georgephilippou.github.io/mosaic-mates/", "Play"], ["https://github.com/GeorgePhilippou/mosaic-mates", "Code"]], "short": "Mosaic Mates", "ai": ["ChatGPT"]}, {"cat": "games", "catName": "Games", "title": "George in WegTown II", "img": "img/wegtown.jpg", "alt": "George in WegTown II gameplay with caricatures of friends falling down the screen", "desc": "A fast arcade dodge-and-collect game starring my friends. Friends and enemies fall down the screen: catch friends for points and an extra heart, and dodge everyone else. Every 30 seconds one enemy goes berserk for 10 seconds, after a 5-second warning. Play solo with keys, mouse or touch, or co-op, where a fallen partner is revived by collecting one of every friend.", "tags": ["HTML5 canvas", "Co-op 2-player", "Web Audio", "Custom art"], "note": "Contains strong language. There's also a family-friendly version.", "links": [["games/wegtown-original/", "Play the full game"], ["games/wegtown/", "Family-friendly version"]], "short": "George in WegTown II", "ai": []}, {"cat": "games", "catName": "Games", "title": "Warfare 1917 — standalone Mac app", "img": "img/warfare.jpg", "alt": "Warfare 1917 title screen running in the standalone app", "desc": "I turned a Flash game I love into a standalone Mac app, after browsers dropped Flash. It runs the game through the Ruffle emulator inside a native Swift wrapper, and a custom WebSocket relay adds a local two-player mode with a phone or tablet as the second controller.", "tags": ["Swift", "Ruffle", "WebSockets", "Python"], "note": "Original game by Armor Games. Not hosted here.", "links": [], "short": "Warfare 1917", "ai": ["Claude"]}, {"cat": "business", "catName": "Business websites", "title": "The Flying Dragon — Thai & Chinese Takeaway", "img": "img/fd-emba.jpg", "alt": "The Flying Dragon Thai and Chinese Takeaway", "desc": "Website for the Thai and Chinese takeaway in Chlorakas, Paphos.", "tags": ["Static site", "GitHub Pages"], "note": "", "links": [["https://theflyingdragonpaphos.github.io/FlyingDragonEmba/", "Visit"]], "short": "Flying Dragon · Takeaway", "ai": ["Claude", "ChatGPT"]}, {"cat": "business", "catName": "Business websites", "title": "The Flying Dragon — Asian Kitchen", "img": "img/fd-tomb.jpg", "alt": "The Flying Dragon Asian Kitchen", "desc": "Website for the Asian Kitchen restaurant at Tomb of the Kings, Kato Paphos.", "tags": ["Static site", "GitHub Pages"], "note": "", "links": [["https://theflyingdragonpaphos.github.io/flyingdragontombofkings/", "Visit"]], "short": "Flying Dragon · Asian Kitchen", "ai": ["Claude", "ChatGPT"]}];
-const CATS=[["all","All",""],["learn","Learning & reference","--c-learn"],["tools","Everyday tools","--c-tools"],["games","Games","--c-games"],["business","Business websites","--c-business"]];
-const V="?v=5";
+const ITEMS=[{"cat": "learn", "catName": "Learning & reference", "title": "Hellenika", "img": "img/hellenika.jpg", "alt": "Hellenika home page", "desc": "An interactive atlas of the Ancient Greek world, 3200–30 BC. 400+ connected entities on a timeline and map, with every claim tagged by its evidence and how confident we can be.", "tags": ["Vanilla JS", "PWA", "Canvas maps"], "note": "", "links": [["https://georgephilippou.github.io/Hellenika/", "Open"], ["https://github.com/GeorgePhilippou/Hellenika", "Code"]], "short": "Hellenika"}, {"cat": "learn", "catName": "Learning & reference", "title": "Dinosauria", "img": "img/dinosauria.jpg", "alt": "Dinosauria home page", "desc": "An open scientific wiki of 328 dinosaur and early-bird profiles, built on the Natural History Museum's Dino Directory, the Paleobiology Database and published research.", "tags": ["JavaScript", "Open data", "Scientific review"], "note": "", "links": [["https://georgephilippou.github.io/Dinosauria/", "Open"], ["https://github.com/GeorgePhilippou/Dinosauria", "Code"]], "short": "Dinosauria"}, {"cat": "learn", "catName": "Learning & reference", "title": "Human Evolution Booklet", "img": "img/booklet.jpg", "alt": "Cover and first page of the Human Evolution Booklet", "desc": "A 64-page illustrated booklet on the evidence for human evolution, made with a Python pipeline and an automatic layout checker. Every new fact is verified against DOIs.", "tags": ["Python", "Typesetting", "Custom figures"], "note": "Print project, not online.", "links": [], "short": "Human Evolution Booklet"}, {"cat": "learn", "catName": "Learning & reference", "title": "Signals & Systems Lab", "img": "img/signals.jpg", "alt": "Signals Lab home page", "desc": "A local-first teaching tool that links the maths, plots and physical intuition for signals and systems, with an accessible data table behind every plot.", "tags": ["TypeScript", "Education", "Accessibility"], "note": "In development.", "links": [], "short": "Signals Lab"}, {"cat": "tools", "catName": "Everyday tools", "title": "TripMap", "img": "img/tripmap.jpg", "alt": "TripMap", "desc": "A mobile-first trip planner. Collect places on a map, build day-by-day itineraries and plan together with another traveller in real time. Works offline.", "tags": ["Leaflet", "PWA", "Firebase"], "note": "", "links": [["https://georgephilippou.github.io/TripMap/", "Open"], ["https://github.com/GeorgePhilippou/TripMap", "Code"]], "short": "TripMap"}, {"cat": "tools", "catName": "Everyday tools", "title": "HAL — voice assistant", "img": "img/hal.jpg", "alt": "HAL: a black monolith-style box with a glowing OLED eye and speaker vents", "desc": "A home-built voice assistant on a Raspberry Pi 5, in a hand-built black monolith case inspired by 2001. It has a HAL-style OLED eye, an iPhone companion app, memory, timers and music.", "tags": ["Python", "Raspberry Pi", "Whisper", "Claude API", "Piper TTS"], "note": "Runs on my home network, so there's no public demo.", "links": [], "short": "HAL"}, {"cat": "games", "catName": "Games", "title": "Dots & Boxes", "img": "img/dots.jpg", "alt": "Dots and Boxes start screen", "desc": "The classic pen-and-paper game, designed for Apple Pencil. Play two players, against the computer, or across two iPads online.", "tags": ["PWA", "Firebase", "Online multiplayer"], "note": "", "links": [["https://georgephilippou.github.io/dots-and-boxes/", "Play"], ["https://github.com/GeorgePhilippou/dots-and-boxes", "Code"]], "short": "Dots & Boxes"}, {"cat": "games", "catName": "Games", "title": "Mosaic Mates", "img": "img/mosaic.jpg", "alt": "Mosaic Mates menu", "desc": "An original block-placement puzzle for two. Solo, shared-board and score-race modes, with private online rooms and drag-and-drop play.", "tags": ["PWA", "Firebase", "Real-time sync"], "note": "", "links": [["https://georgephilippou.github.io/mosaic-mates/", "Play"], ["https://github.com/GeorgePhilippou/mosaic-mates", "Code"]], "short": "Mosaic Mates"}, {"cat": "games", "catName": "Games", "title": "George in WegTown II", "img": "img/wegtown.jpg", "alt": "George in WegTown II gameplay with caricatures of friends falling down the screen", "desc": "A fast arcade game starring my friends. Catch friends for points and hearts, dodge everyone else and survive the berserk enemy every 30 seconds. Play solo, or co-op with revives.", "tags": ["HTML5 canvas", "Co-op 2-player", "Web Audio", "Custom art"], "note": "Contains strong language. There's also a family-friendly version.", "links": [["games/wegtown-original/", "Play the full game"], ["games/wegtown/", "Family-friendly version"]], "short": "George in WegTown II"}, {"cat": "games", "catName": "Games", "title": "Warfare 1917 — standalone Mac app", "img": "img/warfare.jpg", "alt": "Warfare 1917 title screen running in the standalone app", "desc": "I turned a Flash game I love into a standalone Mac app, running it through the Ruffle emulator in a native Swift wrapper, with a local two-player mode that uses a phone as the second controller.", "tags": ["Swift", "Ruffle", "WebSockets", "Python"], "note": "Original game by Armor Games. Not hosted here.", "links": [], "short": "Warfare 1917"}, {"cat": "business", "catName": "Business websites", "title": "The Flying Dragon — Thai & Chinese Takeaway", "img": "img/fd-emba.jpg", "alt": "The Flying Dragon Thai and Chinese Takeaway", "desc": "Website for the Thai and Chinese takeaway in Chlorakas, Paphos.", "tags": ["Static site", "GitHub Pages"], "note": "", "links": [["https://theflyingdragonpaphos.github.io/FlyingDragonEmba/", "Visit"]], "short": "Flying Dragon · Takeaway"}, {"cat": "business", "catName": "Business websites", "title": "The Flying Dragon — Asian Kitchen", "img": "img/fd-tomb.jpg", "alt": "The Flying Dragon Asian Kitchen", "desc": "Website for the Asian Kitchen restaurant at Tomb of the Kings, Kato Paphos.", "tags": ["Static site", "GitHub Pages"], "note": "", "links": [["https://theflyingdragonpaphos.github.io/flyingdragontombofkings/", "Visit"]], "short": "Flying Dragon · Asian Kitchen"}];
+const SECTIONS=[
+ ["learn","Learning & reference","Carefully sourced material on the ancient world, deep time and engineering."],
+ ["games","Games","Playable in the browser, and designed for iPad and Apple Pencil."],
+ ["tools","Everyday tools","Apps built to solve a real problem."],
+ ["business","Business websites","Real sites for a local business."]];
+const V="?v=6";
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const grid=document.getElementById("grid"),filters=document.getElementById("filters"),dlg=document.getElementById("dlg"),dc=document.getElementById("dcontent");
-grid.innerHTML=ITEMS.map((p,i)=>`<button class="tile" data-i="${i}" data-cat="${p.cat}" style="--cc:var(--c-${p.cat})"><img src="${p.img}${V}" alt="${esc(p.alt)}" loading="lazy"><span class="cat">${esc(p.catName)}</span><span class="txt"><h2>${esc(p.short)}</h2><p>${esc(p.desc)}</p>${p.ai.length?`<span class="ai">${esc(p.ai.join(" + "))}</span>`:""}</span></button>`).join("");
-filters.innerHTML=CATS.map(([k,n,v])=>`<button data-k="${k}" aria-pressed="${k==="all"}" ${v?`style="--dot:var(${v})"`:""}>${v?"<i></i>":""}${esc(n)}</button>`).join("");
-filters.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k;
- filters.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
- grid.querySelectorAll(".tile").forEach(t=>t.classList.toggle("dim",k!=="all"&&t.dataset.cat!==k));});
-grid.addEventListener("click",e=>{const t=e.target.closest(".tile");if(!t)return;const p=ITEMS[t.dataset.i];
- dc.innerHTML=`<img src="${p.img}${V}" alt="${esc(p.alt)}"><div class="dbody" style="--cc:var(--c-${p.cat})"><span class="dcat">${esc(p.catName)}</span><h3>${esc(p.title)}</h3><p>${esc(p.desc)}</p>${p.ai.length?`<p class="note" style="font-style:normal">Built with ${esc(p.ai.join(" and "))}</p>`:""}<div class="tags">${p.tags.map(x=>`<span>${esc(x)}</span>`).join("")}</div>${p.note?`<p class="note">${esc(p.note)}</p>`:""}${p.links.length?`<div class="links">${p.links.map(([u,n])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)} ↗</a>`).join("")}</div>`:""}</div>`;
- dlg.showModal();});
-document.getElementById("dclose").onclick=()=>dlg.close();
-dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+const card=p=>`<article class="card"><img src="${p.img}${V}" alt="${esc(p.alt)}" loading="lazy"><div class="body"><h3>${esc(p.title)}</h3><p>${esc(p.desc)}</p>${p.note?`<p class="note">${esc(p.note)}</p>`:""}<div class="tags">${p.tags.map(t=>`<span>${esc(t)}</span>`).join("")}</div>${p.links.length?`<div class="links">${p.links.map(([u,n])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)} ↗</a>`).join("")}</div>`:""}</div></article>`;
+const sec=([id,name,sub])=>{const list=ITEMS.filter(p=>p.cat===id);return `<section id="${id}"><div class="head"><h2>${name}</h2><span class="n">${list.length} ${list.length===1?"project":"projects"}</span></div><p class="sub">${sub}</p><div class="grid">${list.map(card).join("")}</div></section>`};
+const byId=Object.fromEntries(SECTIONS.map(s=>[s[0],s]));
+document.getElementById("root").innerHTML=sec(byId.learn)+sec(byId.games)+
+ `<div class="duo">${sec(byId.tools)}${sec(byId.business)}</div>`;
 </script>
 </body>
 </html>
