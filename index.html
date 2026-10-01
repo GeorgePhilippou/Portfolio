@@ -133,6 +133,23 @@ dialog.pop::backdrop{background:rgba(10,12,6,.66);backdrop-filter:blur(3px)}
 .memory .go{font:inherit;font-weight:600;padding:9px 22px;border-radius:999px;border:0;background:var(--accent);color:#fff;cursor:pointer}
 .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--hero);color:var(--hero-ink);padding:10px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;z-index:50}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:640px){
+ .body p.desc,.tags{min-height:0}
+ .body p.note{min-height:0}.body p.note:empty{display:none}
+ .foot{padding-top:2px}
+ .links{height:auto;gap:2px 8px}
+ .links a{padding:11px 10px 11px 0;min-height:44px;display:inline-flex;align-items:center}
+ .tbtn{padding:10px 14px;font-size:14px}
+ .trio section>p.sub{min-height:0}
+ .head{flex-wrap:wrap;gap:0 12px}
+ .head h2{font-size:25px}
+ .bar .wrap{height:60px}
+ section{padding:28px 0 10px}
+ .grid,.trio .grid{gap:20px}
+ .card:hover{transform:none}
+ footer a{display:inline-block;padding:12px 0}
+ .egg{padding:10px 0}
+}
 </style>
 </head>
 <body>
