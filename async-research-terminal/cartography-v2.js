@@ -4,7 +4,7 @@ const sheetHeight = 500;
 const surveyLandmarks = {
   gate: ['Threshold', 315, 408, 'threshold', 'The engineered doorway joins the facility side to the yellow corridor. Its placement along the edge of the chamber comes from the labelled camera plan.'],
   c1: ['Camera 1', 329, 320, 'motion', 'The plan shows Camera 1 next to the Threshold, aimed along the highlighted lane.'],
-  c2: ['Camera 2', 700, 330, 'motion', 'Camera 2 appears to the right of the Threshold in the close diagram. This marker indicates its side of the survey, with schematic spacing.'],
+  c2: ['Camera 2', 507, 330, 'motion', 'Camera 2 appears to the right of the Threshold in the close diagram. This marker indicates its side of the survey, with schematic spacing.'],
   chamber: ['Main Chamber', 610, 150, 'yellow', 'The wide diagram shows a repeating grid of cross-shaped pillars. This trace covers the visible chamber edge and the marked lane.'],
   barrier: ['Approach', 161, 250, 'division', 'A-Sync can control access at the partition. Report shows the barrier being fitted and Reunion shows an opening made for the rover.'],
   pits: ['Room 14D', 425, 250, 'division', 'A bank of rectangular pits separates the approach from the far door. The route changes when the crew lays a walkway over the openings.'],
@@ -37,7 +37,7 @@ function selectSurvey(areaId,stageId) {
 function surveyMap(areaId,stageId) {
   const {area,stage,markers} = selectSurvey(areaId,stageId);
   const tape = byId[stage.video];
-  const mode = area.id === 'threshold' && stage.id === 'motion' ? 'Trace of the camera plan' :
+  const mode = area.id === 'threshold' && stage.id === 'motion' ? 'Redrawn from the camera plan' :
     area.id === 'threshold' ? 'March plan shown for orientation' : 'Recorded route schematic';
   return title('PROJECT KV31 / FIELD CARTOGRAPHY','Complex map','Select a survey tape, inspect a landmark, and compare the drawing with the original recording.') +
     `<div class="survey-console">
@@ -104,8 +104,9 @@ function drawSurvey(area,stage,markers,selected) {
     ctx.fillRect(268,laneTop,96,332-(laneTop-77));
     line([[268,laneTop],[268,409]],'#e4bc65',!live);
     line([[364,laneTop],[364,409]],'#e4bc65',!live);
-    for (const y of [99,188,277,366]) {
-      for (const x of [139,244,389,494,599,704,809]) {
+    const columns = [110,249,391,533,676,817];
+    for (const y of [107,204,301]) {
+      for (const x of columns) {
         const short=8, long=22;
         const points=[[x-short,y-long],[x+short,y-long],[x+short,y-short],[x+long,y-short],
           [x+long,y+short],[x+short,y+short],[x+short,y+long],[x-short,y+long],
@@ -113,12 +114,17 @@ function drawSurvey(area,stage,markers,selected) {
         line(points,outline,!live,1.5);
       }
     }
-    line([[45,410],[269,410],[284,398],[341,398],[363,410],[836,410]],outline,false,3);
+    let boundary = [[45,410]];
+    for (const x of columns) {
+      boundary.push([x-19,410],[x-19,401],[x-9,401],[x-9,388],[x+9,388],[x+9,401],[x+19,401],[x+19,410]);
+    }
+    boundary.push([836,410]);
+    line(boundary,outline,false,2);
     line([[283,412],[345,412]],'#a3dba5',false,5);
     ctx.fillStyle='#b8c8e5'; ctx.fillText('A-SYNC FACILITY SIDE',42,443);
     if (live) {
       line([[329,320],[329,112]],'#d9ad60',true,1.6);
-      line([[700,330],[607,205]],'#d9ad60',true,1.6);
+      line([[507,330],[413,205]],'#d9ad60',true,1.6);
     }
   } else if (area === 'division') {
     ctx.strokeStyle='#86a9cd'; ctx.lineWidth=3;
