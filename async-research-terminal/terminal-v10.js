@@ -1,4 +1,8 @@
-const records = [...videos, ...dossiers];
+const allDossiers = [...dossiers, ...featureDossiers];
+const allEvents = [...events, featureEvent];
+const allEdges = [...edges, ...featureEdges];
+const allBriefings = {...briefings, ...featureBriefings};
+const records = [...videos, featureFilm, ...allDossiers];
 const byId = Object.fromEntries(records.map(record => [record.id,record]));
 const videoCategory = record => ({'Linked file':'linked',Supplemental:'supplemental'})[record.type] ?? 'public';
 const mainTapes = videos.filter(record => videoCategory(record) === 'public');
@@ -7,12 +11,12 @@ const companionEdges = edges.filter(edge =>
 );
 const navigation = [
   ['Workstation',[['overview','▣','Operator desk']]],
-  ['Records',[['videos','▤','Video archive'],['timeline','◷','Timeline'],['people','◇','Personnel'],['entities','◉','Sightings']]],
+  ['Records',[['videos','▤','Video archive'],['feature','▣','Feature film'],['timeline','◷','Timeline'],['people','◇','Personnel'],['entities','◉','Sightings']]],
   ['Analysis',[['map','▦','Complex map'],['locations','⌗','Locations'],['compare','◫','Compare evidence'],['links','⋈','Connections'],['board','▧','Case board']]]
 ];
 const tabs = navigation.flatMap(([,entries])=>entries);
-const labels = {videos:'Video',people:'Personnel',locations:'Location',entities:'Sighting'};
-const symbols = {videos:'▤',people:'◇',locations:'⌗',entities:'◉'};
+const labels = {videos:'Video',feature:'Feature film',people:'Personnel',locations:'Location',entities:'Sighting'};
+const symbols = {videos:'▤',feature:'▣',people:'◇',locations:'⌗',entities:'◉'};
 const main = document.querySelector('#main');
 const inspector = document.querySelector('#inspector');
 const nav = document.querySelector('#nav');
@@ -151,7 +155,7 @@ function openTape(record,seconds) {
   const header = `<div class="panel-bar"><span id="tape-title">${e(record.title)}</span><button class="button" type="button" data-close-tape autofocus>Close</button></div>`;
   const footer = `<div class="monitor-caption"><span>YouTube playback${start ? ` · Cue ${stamp}` : ''}</span>${watch(record,'Watch on YouTube',start)}</div>`;
   if (location.protocol === 'file:') {
-    tapePlayer.innerHTML = header + `<div class="panel-body"><p>For in-app playback, open the <a href="https://georgephilippou.github.io/Portfolio/async-research-terminal/#record/${record.id}">hosted tape record</a>.</p></div>` + footer;
+    tapePlayer.innerHTML = header + `<div class="panel-body"><p>For in-app playback, open the <a href="https://georgephilippou.github.io/Portfolio/async-research-terminal/#record/${record === featureTrailer ? featureFilm.id : record.id}">hosted archive record</a>.</p></div>` + footer;
   } else {
     const params = new URLSearchParams({autoplay:'1',playsinline:'1',rel:'0'});
     if (start) params.set('start',String(start));
@@ -205,7 +209,7 @@ function exhibitGallery(items,heading='Visual evidence') {
 }
 
 function row(record,caption=record.summary,tag=record.release ? dateLabel(record.release) : labels[record.group]) {
-  const preview = evidence[evidenceFor[record.id]?.[0]];
+  const preview = record === featureFilm ? featureImage : evidence[evidenceFor[record.id]?.[0]];
   return `<a class="record ${preview ? 'has-thumb' : ''}" href="#record/${record.id}">
     ${preview ? evidenceImage(preview,'entry-thumb') : `<span class="record-icon" aria-hidden="true">${symbols[record.group]}</span>`}
     <span class="record-main"><strong>${e(record.title)}</strong><small>${e(caption)}</small>${preview ? `<small class="preview-type">${e(preview.kind)}</small>` : ''}</span><span class="tag">${e(tag)}</span>
@@ -246,7 +250,7 @@ function videoArchive() {
   const chosen = videos.filter(record => videoFilter === 'all' || videoFilter === videoCategory(record));
   return title('ARCHIVE / MEDIA','Video archive','Open a tape to inspect its story dates, scene notes, references and connections.') +
     `<div class="toolbar" aria-label="Filter videos">${filters.map(([id,name]) => `<button class="button" data-video-filter="${id}" aria-pressed="${id === videoFilter}">${name}</button>`).join('')}<span class="meta muted">${chosen.length} records</span></div>` +
-    listing(chosen);
+    listing(chosen) + (videoFilter === 'all' ? '<div class="section-line"><h2>Feature film</h2></div>' + listing([featureFilm]) : '');
 }
 
 function companionCard(record,label) {
@@ -258,7 +262,19 @@ function companionCard(record,label) {
 
 function releaseFilmstrip() {
   const attached = new Set(companionEdges.map(edge => edge.to));
-  const columns = videos.filter(record => !attached.has(record.id)).map(record => {
+  const releases = [...videos.filter(record => !attached.has(record.id)), featureFilm].sort((a,b) => a.release.localeCompare(b.release));
+  const columns = releases.map(record => {
+    if (record === featureFilm) {
+      return `<li class="film-column film-feature">
+        <div class="film-upper"></div><div class="film-axis"></div>
+        <article class="film-card" data-film="${record.id}">
+          <a class="film-record" href="#record/feature">${evidenceImage(featureImage)}
+            <time datetime="${record.release}">${e(dateLabel(record.release))}</time><strong>${e(record.title)}</strong>
+          </a>
+          <div class="film-actions">${playButton(featureTrailer,'Trailer')}${recordLink(record.id,'Film file')}</div>
+        </article>
+      </li>`;
+    }
     if (videoCategory(record) !== 'public') {
       return `<li class="film-column film-gap"><div class="film-upper">${companionCard(record,record.type)}</div><div class="film-axis"></div></li>`;
     }
@@ -280,43 +296,43 @@ function releaseFilmstrip() {
     <div class="film-tools">
       <button class="button" type="button" data-film-scroll="-1">Scroll left</button>
       <button class="button" type="button" data-film-scroll="1">Scroll right</button>
-      <label for="film-jump">Jump to episode</label>
-      <select id="film-jump"><option value="">Choose an episode</option>${mainTapes.map(record =>
+      <label for="film-jump">Jump to release</label>
+      <select id="film-jump"><option value="">Choose a release</option>${releases.filter(record => mainTapes.includes(record) || record === featureFilm).map(record =>
         `<option value="${record.id}">${e(record.title)}</option>`).join('')}</select>
     </div>
     <div class="film-viewport" tabindex="0" aria-label="Scrollable release filmstrip">
       <ol class="film-track">${columns}</ol>
     </div>
-    <div class="monitor-caption film-key"><span><b>Above</b> · Companion files and supplemental material</span><span><b>Below</b> · Main episodes, in upload order</span></div>
+    <div class="monitor-caption film-key"><span><b>Above</b> · Companion files and supplemental material</span><span><b>Below</b> · Main episodes and the feature film</span></div>
   </section>`;
 }
 
 function storyChronology() {
   const eventRow = event => `<a class="record timeline-row" href="#record/${event.video}"><time>${e(dateLabel(event.date))}</time><span class="record-main"><strong>${e(event.title)}</strong><small>${e(byId[event.video].title)} · ${e(event.note)}</small></span><span class="tag">${e(event.basis)}</span></a>`;
   const orderDate = event => event.video === 'recording' ? '1990-05-08' : event.date;
-  const dated = events.filter(event => event.date && event.basis !== 'Relative date').sort((a,b) => orderDate(a).localeCompare(orderDate(b)));
-  const relative = events.filter(event => event.basis === 'Relative date');
-  const undated = events.filter(event => !event.date);
+  const dated = allEvents.filter(event => event.date && event.basis !== 'Relative date' && event !== featureEvent).sort((a,b) => orderDate(a).localeCompare(orderDate(b)));
+  const relative = allEvents.filter(event => event.basis === 'Relative date' || event === featureEvent);
+  const undated = allEvents.filter(event => !event.date);
   return `<div class="record-list">${dated.map(eventRow).join('')}</div>
-    <div class="section-line"><h2>Known sequence, uncertain date</h2></div><div class="record-list">${relative.map(eventRow).join('')}</div>
+    <div class="section-line"><h2>Approximate dates and sequences</h2></div><div class="record-list">${relative.map(eventRow).join('')}</div>
     <div class="section-line"><h2>Unplaced events</h2></div><div class="record-list">${undated.map(eventRow).join('')}</div>`;
 }
 
 function timeline(mode) {
   const isStory = mode === 'story';
-  return title('ARCHIVE / CHRONOLOGY','Timeline',isStory ? 'Reconstruct the order of events from dates in the footage, upload descriptions, and secondary references.' : 'Follow the main series in upload order. Linked files sit above their related episode, while standalone supplements sit between releases.') +
+  return title('ARCHIVE / CHRONOLOGY','Timeline',isStory ? 'Reconstruct the order of events from dates in the footage, upload descriptions, and secondary references.' : 'Follow the main series and feature film in release order. Linked files sit above their related episodes, while standalone supplements sit between releases.') +
     `<nav class="toolbar timeline-switch" aria-label="Timeline order"><a class="button" href="#timeline/release" ${isStory ? '' : 'aria-current="page"'}>YouTube release order</a><a class="button" href="#timeline/story" ${isStory ? 'aria-current="page"' : ''}>In-story chronology</a></nav>` +
     (isStory ? storyChronology() : releaseFilmstrip());
 }
 
 function jumpToFilm(id) {
-  if (!videos.some(record => record.id === id)) return;
+  if (!byId[id]?.release) return;
   const viewport = main.querySelector('.film-viewport');
   const item = viewport?.querySelector(`[data-film="${id}"]`);
   if (!item) return;
   const bounds = viewport.getBoundingClientRect();
   viewport.scrollLeft += item.getBoundingClientRect().left - bounds.left - 14;
-  main.querySelector('#film-jump').value = mainTapes.some(record => record.id === id) ? id : '';
+  main.querySelector('#film-jump').value = mainTapes.includes(byId[id]) || id === featureFilm.id ? id : '';
 }
 
 function tapeNavigation(record) {
@@ -330,17 +346,21 @@ function tapeNavigation(record) {
   </nav>`;
 }
 
+function routePanel(route) {
+  return `<section class="panel doc">
+    <div class="panel-bar">${e(route.title)}</div><div class="route route-bg">${route.nodes.map(([id,label,type],index) => `<a href="#record/${id}"><span class="tag">STOP ${index+1}</span><strong>${e(label)}</strong><small>${e(type)}</small></a>`).join('')}</div>
+    <div class="monitor-caption">${e(route.description)}</div></section>`;
+}
+
 function dossierIndex(group) {
   const header = {
     people:['FILES / PERSONNEL','Personnel dossiers','Trace people and organisations across field tapes, narration, and internal records.'],
     locations:['SURVEY / ROUTE FRAGMENTS','Complex survey','Explore the order of spaces shown in each tape. The diagrams represent routes with unknown scale and orientation.'],
     entities:['FIELD RECORDS / LIFEFORM ACTIVITY','Sighting register','Review encounters one by one and follow the original recordings. Possible matches are marked as hypotheses.']
   }[group];
-  const diagrams = group === 'locations' ? routes.map(route => `<section class="panel doc">
-    <div class="panel-bar">${e(route.title)}</div><div class="route route-bg">${route.nodes.map(([id,label,type],index) => `<a href="#record/${id}"><span class="tag">STOP ${index+1}</span><strong>${e(label)}</strong><small>${e(type)}</small></a>`).join('')}</div>
-    <div class="monitor-caption">${e(route.description)}</div></section>`).join('') : '';
+  const diagrams = group === 'locations' ? [...routes,featureRoute].map(routePanel).join('') : '';
   return title(...header) + (diagrams ? `<div class="toolbar">${button('Open Complex map','#map')}</div>` : '') +
-    listing(dossiers.filter(record => record.group === group)) +
+    listing(allDossiers.filter(record => record.group === group)) +
     (diagrams ? '<div class="section-line"><h2>Survey routes</h2></div>' + diagrams : '');
 }
 
@@ -351,22 +371,22 @@ function connectionCard(edge, showSource=true) {
 
 function connections() {
   const center = byId[mapRecord];
-  const mapEdges = edges.filter(edge => edge.from === mapRecord || edge.to === mapRecord);
+  const mapEdges = allEdges.filter(edge => edge.from === mapRecord || edge.to === mapRecord);
   const links = mapEdges.map(edge => {
     const other = byId[edge.from === mapRecord ? edge.to : edge.from];
     return `<div class="map-branch"><span class="tag">${e(edge.kind)}</span><a href="#record/${other.id}">${e(other.title)}</a><small class="muted">${e(edge.status)}</small></div>`;
   });
-  const mapIds = [...new Set(edges.flatMap(edge => [edge.from, edge.to]))];
+  const mapIds = [...new Set(allEdges.flatMap(edge => [edge.from, edge.to]))];
   const map = panel('Relationship map', `<div class="toolbar"><label for="map-record">Inspect neighbours</label><select id="map-record">${mapIds.map(id => `<option value="${id}" ${id === mapRecord ? 'selected' : ''}>${e(byId[id].title)}</option>`).join('')}</select></div><div class="relationship-map route-bg"><div class="map-anchor">${recordLink(center.id)}</div><div class="map-branches">${links.join('')}</div></div>`,'doc');
-  const statuses = ['all',...new Set(edges.map(edge => edge.status))];
-  const matches = edges.filter(edge => edgeFilter === 'all' || edge.status === edgeFilter);
+  const statuses = ['all',...new Set(allEdges.map(edge => edge.status))];
+  const matches = allEdges.filter(edge => edgeFilter === 'all' || edge.status === edgeFilter);
   return title('ANALYSIS / CROSS-REFERENCES','Connections','Follow a documented link, compare two views of an incident, or inspect an open hypothesis.') + map + '<div class="section-line"><h2>Evidence register</h2></div>' +
     `<div class="toolbar"><label for="edge-type">Evidence status</label><select id="edge-type">${statuses.map(status => `<option value="${e(status)}" ${status === edgeFilter ? 'selected' : ''}>${e(status === 'all' ? 'All connections' : status)}</option>`).join('')}</select><span class="meta muted">${matches.length} connections</span></div><div class="guide">${matches.map(edge => connectionCard(edge)).join('')}</div>`;
 }
 
 function briefingPanel(record) {
-  const briefing = briefings[record.id];
-  const facts = `<div class="facts">${record.release ? `<span>Upload · ${e(dateLabel(record.release))}</span><span>Runtime · ${e(record.duration)}</span>` : ''}<span>${e(record.type)}</span></div>`;
+  const briefing = allBriefings[record.id];
+  const facts = `<div class="facts">${record.release ? `<span>${record === featureFilm ? 'Theatrical release' : 'Upload'} · ${e(dateLabel(record.release))}</span><span>Runtime · ${e(record.duration)}</span>` : ''}<span>${e(record.type)}</span></div>`;
   const points = briefing.points.map(([heading,description,...sources]) => {
     const links = sources.map(([id,seconds]) => {
       const source = byId[id];
@@ -384,16 +404,17 @@ function briefingPanel(record) {
     </div>
     <div class="briefing-why"><h3>Why it matters</h3><p>${e(briefing.why)}</p></div>
     <div class="briefing-findings"><h3>Key information</h3><ul class="briefing-points">${points}</ul></div>
-    <div class="briefing-open"><h3>What remains open</h3><p>${e(briefing.open)}</p>${reference}</div>
+    ${briefing.open ? `<div class="briefing-open"><h3>What remains open</h3><p>${e(briefing.open)}</p>${reference}</div>` : ''}
   `,'doc briefing');
 }
 
 function recordPage(record) {
   const isVideo = record.group === 'videos';
-  const related = edges.filter(edge => edge.from === record.id || edge.to === record.id);
-  const sightings = dossiers.filter(entry => entry.refs.includes(record.id));
+  const isFeature = record === featureFilm;
+  const related = allEdges.filter(edge => edge.from === record.id || edge.to === record.id);
+  const sightings = allDossiers.filter(entry => entry.refs.includes(record.id));
   const sceneList = moments[record.id] ?? [];
-  const recordEvents = events.filter(event => event.video === record.id);
+  const recordEvents = allEvents.filter(event => event.video === record.id);
   const pin = memory.pins.includes(record.id);
   const mapArea = surveyAreas.find(area => area.id === record.id || area.stages.some(stage=>stage.video === record.id));
   const mapStage = mapArea?.stages.find(stage=>stage.video === record.id)?.id ?? mapArea?.start;
@@ -401,9 +422,29 @@ function recordPage(record) {
   const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p></article>`).join(''),'doc') : '';
   const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : playButton(record,'Play from this cue',scene.seconds)}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
   const associations = isVideo ? sightings : record.refs.map(id => byId[id]);
-  return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + (isVideo ? tapeNavigation(record) : '') + briefingPanel(record) + evidenceGallery(record) + datePanel + scenePanel +
+  return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + (isVideo ? tapeNavigation(record) : '') + (isFeature ? featureMedia() : '') + briefingPanel(record) + evidenceGallery(record) + datePanel + scenePanel +
+    (isFeature ? featureEvidence() : '') +
     (related.length ? panel('Connections',related.map(edge => connectionCard(edge)).join(''),'doc') : '') +
-    (associations.length ? `<div class="section-line"><h2>${isVideo ? 'Referenced dossiers' : 'Referenced videos'}</h2></div>${listing(associations)}` : '');
+    (associations.length ? `<div class="section-line"><h2>${isVideo ? 'Referenced dossiers' : 'Referenced records'}</h2></div>${listing(associations)}` : '');
+}
+
+function featureMedia() {
+  return panel('A24 · theatrical release', `<div class="feature-media">
+    ${evidenceImage(featureImage,'feature-image',true)}
+    <div><p>Kane Parsons · Director<br>Will Soodik · Screenwriter</p>
+    <div class="toolbar">${playButton(featureTrailer,'Play official trailer')}${sourceLink(featureSources.release[1],'Official viewing options')}</div>
+    <small>Trailer image · A24</small></div>
+  </div>`,'doc');
+}
+
+function featureEvidence() {
+  const people = featureDossiers.filter(record => record.group === 'people');
+  const sightings = featureDossiers.filter(record => record.group === 'entities');
+  const spoilers = featureSpoilers.map(([heading,note,refs]) => `<article class="scene"><h3>${e(heading)}</h3><p>${e(note)}</p>
+    <div class="briefing-sources">${refs.map(id => recordLink(id)).join('')}</div></article>`).join('');
+  return '<div class="section-line"><h2>Feature personnel</h2></div>' + listing(people) + routePanel(featureRoute) +
+    `<details class="panel doc feature-spoilers"><summary class="panel-bar">Feature spoilers · sightings and ending</summary>
+    <div class="panel-body">${listing(sightings)}${spoilers}<p>${sourceLink(featureSources.ending[1],featureSources.ending[0])}</p></div></details>`;
 }
 
 function safeExternal(text) {
@@ -435,11 +476,11 @@ function board() {
 function searchResults() {
   const query = search.value.trim().toLowerCase();
   const results = query ? records.filter(record => {
-    const briefing = briefings[record.id];
+    const briefing = allBriefings[record.id];
     const context = [
       record.title, record.id, record.type, record.summary, record.release, dateLabel(record.release),
       briefing.why, ...briefing.points.flatMap(([heading,description]) => [heading,description]),
-      ...events.filter(event => event.video === record.id).flatMap(event => [event.date,event.title]),
+      ...allEvents.filter(event => event.video === record.id).flatMap(event => [event.date,event.title]),
       ...(record.refs ?? []).map(id => byId[id].title)
     ].join(' ').toLowerCase();
     return query.split(/\s+/).every(word => context.includes(word));
@@ -449,15 +490,22 @@ function searchResults() {
 
 function recordInspector(record) {
   const isVideo = record.group === 'videos';
+  if (record.filmSources) {
+    const sources = record.filmSources.map(key => {
+      const [label,url] = featureSources[key];
+      return sourceLink(url,label);
+    }).join('');
+    return panel('Film sources',`<div class="source-list">${sources}</div>`);
+  }
   const source = isVideo ? watch(record) : '';
   const refs = isVideo ? '' : record.refs.map(id => `<span>${watch(byId[id],byId[id].title)}</span>`).join('');
-  const descriptive = edges.filter(edge => edge.from === record.id && edge.kind === 'Description link');
+  const descriptive = allEdges.filter(edge => edge.from === record.id && edge.kind === 'Description link');
   return panel('Source register',`<div class="source-list">${source}${refs}${sourceLink(catalogSource,'Episode catalogue')}${sourceLink(chronologySource,'Secondary chronology')}${record.id === 'ff1' ? sourceLink(footageSource,'Found Footage scene reference') : ''}</div>`) +
     (isVideo ? panel('YouTube metadata',descriptive.length ? descriptive.map(edge => `<p><span class="tag">${e(edge.status)}</span> · ${recordLink(edge.to)}</p>`).join('') + '<p class="muted">Pinned and viewer comments are awaiting review.</p>' : '<p class="muted">Description and comment coverage varies by file. Open the upload to inspect the current page.</p>') : '');
 }
 
 function dashboardInspector() {
-  const sampleEvents = ['1972-08-02','1989-10-17','1990-05-08','1996-09-23'].map(date => events.find(event => event.date === date));
+  const sampleEvents = ['1972-08-02','1989-10-17','1990-05-08','1996-09-23'].map(date => allEvents.find(event => event.date === date));
   return panel('Incident log',sampleEvents.map(event => `<div class="incident"><time>${e(dateLabel(event.date))}</time>${recordLink(event.video,event.title)}</div>`).join('') + button('Open chronology','#timeline/story')) +
     panel('Active lead',`<p class="mini-title">The Ivan Beck file</p><p class="muted">Follow Beck from the project’s public rationale through the recovered-body examination and the Tench incident.</p>${button('Inspect dossier','#record/beck')}`) +
     panel('Evidence key','<p><span class="tag">DOCUMENTED</span><br>Directly attested in the cited source.</p><p><span class="tag warning">HYPOTHESIS</span><br>A possible relationship to investigate.</p>');
@@ -476,9 +524,9 @@ function render() {
   const isCompare = page === 'compare';
   const fullWidth = isFilmstrip || isSurvey || isCompare;
   filmScroll = main.querySelector('.film-viewport')?.scrollLeft ?? filmScroll;
-  const entry = page === 'record' ? byId[id] : null;
+  const entry = page === 'feature' ? featureFilm : (page === 'record' ? byId[id] : null);
   const active = entry?.group ?? page;
-  const views = {overview, videos:videoArchive, timeline:()=>timeline(id), map:()=>surveyMap(id,stage), compare:()=>comparisonView(id,stage), people:()=>dossierIndex('people'),
+  const views = {overview, videos:videoArchive, timeline:()=>timeline(id), map:()=>surveyMap(id,stage) + routePanel(featureRoute), compare:()=>comparisonView(id,stage), people:()=>dossierIndex('people'),
     locations:()=>dossierIndex('locations'), entities:()=>dossierIndex('entities'),
     links:connections, board, search:searchResults};
   nav.innerHTML = navigation.map(([group,entries])=>`<div class="nav-section"><span class="nav-heading">${group}</span>${entries.map(([key,symbol,label]) =>
@@ -539,7 +587,7 @@ tapePlayer.addEventListener('cancel', event => {
 document.addEventListener('click', event => {
   const play = event.target.closest('[data-play]');
   if (!play || document.body.classList.contains('login-pending')) return;
-  const record = byId[play.dataset.play];
+  const record = play.dataset.play === featureTrailer.id ? featureTrailer : byId[play.dataset.play];
   if (!record?.yt) return;
   if (lightbox.open) lightbox.close();
   openTape(record,Number(play.dataset.start));

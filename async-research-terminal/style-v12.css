@@ -274,3 +274,13 @@ body.login-pending .login-shell{width:min(100%,435px);box-shadow:10px 11px 0 #12
 .login-identity h1{font-size:clamp(1.5rem,6vw,2rem)}
 .review-watermark{display:block;width:50px;height:50px;flex:none;object-fit:contain}
 @media(max-width:860px){.review-badge{padding:2px}.review-words{display:none}.review-watermark{width:38px;height:38px}}
+
+.film-feature .film-axis::after{background:#53694d}
+.film-feature .film-card{border-color:#697b62;background:#eff1e6}
+.feature-media{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:12px}
+.feature-media img{display:block;width:100%;max-width:480px;height:auto;aspect-ratio:16/9;object-fit:cover;background:#191d2a}
+.feature-media .toolbar{margin:9px 0}
+.feature-media small{color:var(--muted)}
+.feature-spoilers summary{display:list-item;cursor:pointer}
+.feature-spoilers{margin-top:12px}
+@media(max-width:580px){.feature-media{grid-template-columns:1fr}}
