@@ -137,3 +137,15 @@ body.login-pending .login-shell{display:block;width:min(100%,475px);padding:0;ba
 .mast-tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px 9px}
 .mast-tools label{font:700 .8rem var(--mono);color:#252e57}
 @media(max-width:580px){.mast{flex-wrap:wrap}.mast-tools{width:100%;padding:3px 0;justify-content:flex-start}.mast-tools .sign-out{margin-left:auto}}
+.briefing h4{margin:0;font-size:.96rem}
+.briefing p{margin-top:4px;max-width:76ch}
+.briefing-intro .facts{margin-top:9px}
+.briefing-why,.briefing-open{padding:9px 11px;border-left:3px solid var(--blue);background:#e6e7f2}
+.briefing-open{border-color:#8f805d;background:#f1ebd5}
+.briefing-points{display:grid;gap:0;list-style:none;margin:4px 0 0;padding:0}
+.briefing-points li{padding:9px 0;border-bottom:1px solid #c7c8cc}
+.briefing-points li:last-child{border:0;padding-bottom:3px}
+.briefing-sources{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:.82rem}
+.briefing-sources .button{min-height:25px;padding:3px 5px;font-size:.79rem}
+.record.has-thumb{align-items:start}
+.record.has-thumb .tag{align-self:center}

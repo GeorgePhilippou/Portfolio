@@ -129,9 +129,13 @@ function closeTape() {
   if (tapePlayer.open) tapePlayer.close();
 }
 
+function cueStamp(seconds) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2,'0')}`;
+}
+
 function openTape(record,seconds) {
   const start = Number.isSafeInteger(seconds) && seconds > 0 ? seconds : 0;
-  const stamp = `${Math.floor(start / 60)}:${String(start % 60).padStart(2,'0')}`;
+  const stamp = cueStamp(start);
   const header = `<div class="panel-bar"><span id="tape-title">${e(record.title)}</span><button class="button" type="button" data-close-tape autofocus>Close</button></div>`;
   const footer = `<div class="monitor-caption"><span>YouTube playback${start ? ` · Cue ${stamp}` : ''}</span>${watch(record,'Watch on YouTube',start)}</div>`;
   if (location.protocol === 'file:') {
@@ -165,7 +169,7 @@ function evidenceImage(item, className = '', eager = false) {
 
 function evidenceCaption(item) {
   const video = byId[item.video];
-  return `<span class="meta">${e(item.kind)} · Kane Parsons</span><p>${e(item.note)}</p><div class="exhibit-links">
+  return `<span class="meta">${e(item.kind)} · ${e(item.credit ?? 'Kane Parsons')}</span><p>${e(item.note)}</p><div class="exhibit-links">
     ${playButton(video,item.seconds == null ? 'Play source video' : 'Play from this frame',item.seconds)}
     ${watch(video, `Source tape · ${video.title}`, item.seconds)}
     ${item.reference ? sourceLink(item.reference, 'Image reference') : ''}
@@ -184,7 +188,7 @@ function evidenceGallery(record) {
   }).join('')}</div>`, 'doc');
 }
 
-function row(record,caption=record.type,tag=record.release ? dateLabel(record.release) : labels[record.group]) {
+function row(record,caption=record.summary,tag=record.release ? dateLabel(record.release) : labels[record.group]) {
   const preview = evidence[evidenceFor[record.id]?.[0]];
   return `<a class="record ${preview ? 'has-thumb' : ''}" href="#record/${record.id}">
     ${preview ? evidenceImage(preview,'entry-thumb') : `<span class="record-icon" aria-hidden="true">${symbols[record.group]}</span>`}
@@ -267,6 +271,30 @@ function connections() {
     `<div class="toolbar"><label for="edge-type">Evidence status</label><select id="edge-type">${statuses.map(status => `<option value="${e(status)}" ${status === edgeFilter ? 'selected' : ''}>${e(status === 'all' ? 'All connections' : status)}</option>`).join('')}</select><span class="meta muted">${matches.length} connections</span></div><div class="guide">${matches.map(edge => connectionCard(edge)).join('')}</div>`;
 }
 
+function briefingPanel(record) {
+  const briefing = briefings[record.id];
+  const facts = `<div class="facts">${record.release ? `<span>Upload · ${e(dateLabel(record.release))}</span><span>Runtime · ${e(record.duration)}</span>` : ''}<span>${e(record.type)}</span></div>`;
+  const points = briefing.points.map(([heading,description,...sources]) => {
+    const links = sources.map(([id,seconds]) => {
+      const source = byId[id];
+      if (seconds != null) return playButton(source,`${source.title} · ${cueStamp(seconds)}`,seconds);
+      if (id === record.id) return watch(source,'Original video');
+      return recordLink(id);
+    });
+    return `<li><h4>${e(heading)}</h4><p>${e(description)}</p><div class="briefing-sources">${links.join('')}</div></li>`;
+  }).join('');
+  const reference = briefing.reference ? `<div class="briefing-sources">${sourceLink(briefing.reference,'Additional source notes')}</div>` : '';
+  return panel('Entry briefing',`
+    <div class="briefing-intro">
+      <h2>${record.group === 'people' ? (record.id === 'async' ? 'What is A-Sync?' : 'Who is this?') : 'Overview'}</h2>
+      <p>${e(record.summary)}</p>${facts}
+    </div>
+    <div class="briefing-why"><h3>Why it matters</h3><p>${e(briefing.why)}</p></div>
+    <div class="briefing-findings"><h3>Key information</h3><ul class="briefing-points">${points}</ul></div>
+    <div class="briefing-open"><h3>What remains open</h3><p>${e(briefing.open)}</p>${reference}</div>
+  `,'doc briefing');
+}
+
 function recordPage(record) {
   const isVideo = record.group === 'videos';
   const related = edges.filter(edge => edge.from === record.id || edge.to === record.id);
@@ -275,11 +303,10 @@ function recordPage(record) {
   const recordEvents = events.filter(event => event.video === record.id);
   const pin = memory.pins.includes(record.id);
   const actions = `<div class="toolbar">${isVideo ? playButton(record) : ''}<button class="button" data-pin="${record.id}" aria-pressed="${pin}">${pin ? 'Pinned to case board' : 'Pin to case board'}</button>${isVideo ? watch(record) : ''}</div>`;
-  const details = panel('Record summary', `<p>${e(record.summary)}</p><div class="facts">${isVideo ? `<span>Upload · ${e(dateLabel(record.release))}</span><span>Runtime · ${e(record.duration)}</span>` : ''}<span>${e(record.type)}</span></div>`,'doc');
   const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p></article>`).join(''),'doc') : '';
   const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : playButton(record,'Play from this cue',scene.seconds)}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
   const associations = isVideo ? sightings : record.refs.map(id => byId[id]);
-  return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + details + evidenceGallery(record) + datePanel + scenePanel +
+  return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + briefingPanel(record) + evidenceGallery(record) + datePanel + scenePanel +
     (related.length ? panel('Connections',related.map(edge => connectionCard(edge)).join(''),'doc') : '') +
     (associations.length ? `<div class="section-line"><h2>${isVideo ? 'Referenced dossiers' : 'Referenced videos'}</h2></div>${listing(associations)}` : '');
 }
@@ -313,8 +340,10 @@ function board() {
 function searchResults() {
   const query = search.value.trim().toLowerCase();
   const results = query ? records.filter(record => {
+    const briefing = briefings[record.id];
     const context = [
       record.title, record.id, record.type, record.summary, record.release, dateLabel(record.release),
+      briefing.why, ...briefing.points.flatMap(([heading,description]) => [heading,description]),
       ...events.filter(event => event.video === record.id).flatMap(event => [event.date,event.title]),
       ...(record.refs ?? []).map(id => byId[id].title)
     ].join(' ').toLowerCase();

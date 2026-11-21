@@ -1,10 +1,11 @@
 // Storyboard times come from the original upload’s preview metadata.
 const evidence = Object.fromEntries(videos.map(video => [`upload-${video.id}`, {
-  file: `upload-${video.id}`,
+  file: video.id === 'lighting' ? 'lighting-survey-original' : `upload-${video.id}`,
   video: video.id,
   title: 'Upload thumbnail',
   kind: 'Official upload thumbnail',
-  alt: `Creator-selected thumbnail for ${video.title}`,
+  alt: `Thumbnail for ${video.title}`,
+  ...(video.id === 'simpsons' ? {credit:'YouTube upload by Laura Harris'} : {}),
   note: 'The image supplied with the original YouTube upload. Its exact frame time is unassigned.'
 }]));
 

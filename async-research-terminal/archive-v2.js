@@ -25,17 +25,17 @@ const videos = [
   ['home','home_27647.mov','2022-08-22','3:26','Kq6l9yCO9rI','Linked file','Home video and family photographs supply domestic imagery for comparison with Found Footage #2, including a painting.'],
   ['remember','I Remember','2022-08-30','1:29','c-H59GkA-I4','Supplemental','A Kane Pixels upload using liminal interior imagery and music. Its status in the web-series narrative is uncertain.'],
   ['reunion','Reunion','2022-12-08','13:12','ye6YpxFE9jk','Field tape','A crew returns to Division 14. An encounter with Peter Tench connects the closed survey area with the story of the missing researcher.'],
-  ['recording','_recording014','2022-12-08','2:32','cjUqCsDmx-I','Linked file','A phone conversation involving Ivan Beck discusses Tench after his return. The call provides an A-Sync account of the situation.'],
+  ['recording','_recording014','2022-12-08','2:32','cjUqCsDmx-I','Linked file','Clyde calls his supervisor, Ivan Beck, after finding a disoriented employee who identifies himself as Peter Tench. The recording contains Clyde’s side of the exchange.'],
   ['overflow','Overflow','2022-12-24','1:39','8TYopkSmKyA', 'Experiment','An overload and green light interrupt an earlier experiment. A signed document brings Ivan Beck into a much earlier part of the chronology.'],
   ['damage','Damage Control','2023-01-30','14:03','j6klSI8GlXI', 'Incident report','A-Sync accounts for Tench’s disappearance and the confrontation in Reunion. The institution’s report gives one version of his fate.'],
   ['ff3','Backrooms - Found Footage #3','2024-09-13','45:01','acdYs9tPLko', 'Found footage','Ravi enters through his basement and traverses varied spaces, including a skywalk and domestic interiors. Voices, radio signals and brief silhouettes are separate pieces of evidence.'],
-  ['lighting','Lighting and Tile Survey','2024-10-02','8:43','WbmkjR3gIgE', 'Survey','Researchers remove lighting hardware and ceiling tiles. Their report describes unusual dimensions and records manufacturing details.'],
+  ['lighting','Lighting and Tile Survey','2024-10-02','8:43','DSWUEmJDglw', 'Survey','Researchers remove lighting hardware and ceiling tiles. Their report describes unusual dimensions and records manufacturing details.'],
   ['static','Static Dead End','2025-02-12','4:02','ZbPaWvqAEq4', 'Field tape','Marvin and George discuss Tench. A follow-up survey beyond Room 14D records distorted surfaces and furniture intersecting floors and walls.'],
   ['everything','Everything Must Go','2026-08-18','16:04','ewZx0bnBb30','Field tape','A-Sync explores the Kelowna Branch, where store signs recur across surfaces. Opening a wall leads to a retail interior and a pursuit.']
 ].map(([id,title,release,duration,yt,type,summary]) => ({id,title,release,duration,yt,type,summary, group:'videos'}));
 
 const dossiers = [
-  {id:'beck',group:'people',title:'Ivan Beck',type:'A-Sync vice-director',summary:'The Third Test attributes the public housing and storage rationale to Beck. Later records place him in discussions about a recovered body and Peter Tench. Overflow links his name to an earlier experiment through a signed document.',refs:['third','autopsy','recording','overflow']},
+  {id:'beck',group:'people',title:'Ivan Beck',type:'A-Sync vice-director',summary:'Ivan Beck is the vice-director of the A-Sync Research Institute. He publicly champions KV31 as a way to address housing and storage needs and is later contacted about Peter Tench’s return.',refs:['third','autopsy','recording','overflow']},
   {id:'tench',group:'people',title:'Peter Tench',type:'A-Sync researcher',summary:'A separated surveyor returns to the Threshold outpost. Presentation, Reunion and Damage Control reframe that event from different institutional and personal perspectives.',refs:['info','present','recording','reunion','damage','static']},
   {id:'leigh',group:'people',title:'Marvin E. Leigh',type:'A-Sync researcher',summary:'The camera operator in Pitfalls descends through a pit and documents a pursuit. Report reviews that recording. Later appearances connect the field surveys to the Tench incident.',refs:['pit','report','reunion','static']},
   {id:'ravi',group:'people',title:'Ravi',type:'Civilian camera operator',summary:'Ravi documents his passage from a basement into large interiors and makes repeated attempts to establish contact.',refs:['ff3']},
@@ -55,7 +55,7 @@ const dossiers = [
 ];
 
 const events = [
-  ['overflow','1972-08-02','Power overload','Reported recording date','An early equipment event precedes the Threshold project shown in First Contact.'],
+  ['overflow','1972-08-02','Date on Beck’s document','Date visible on the document','The signed document dates to August 2, 1972. The equipment event is associated with this date, and its exact day is uncertain.'],
   ['proto','1982','Prototype trial','Reported year','An early test of the magnetic distortion system.'],
   ['third','1988-04','Beck’s public rationale','Narration · month','The narrator attributes the housing and storage objective to Beck at an April conference.'],
   ['third','1988-07-02','Third test','Narration · day','The tape places the third test on this date.'],
@@ -65,10 +65,10 @@ const events = [
   ['lighting','1989-11-15','Preliminary analysis','Reported report date','The laboratory reports unusual dimensions.'],
   ['missing','1990-02-03','Survey team finds a body','Secondary chronology','The field team’s discovery leads into the autopsy record.'],
   ['autopsy','1990-02-05','Medical examination','Secondary chronology','The examiner describes the body and addresses Beck.'],
-  ['info','1990-02-29','Surveyor is separated','Anomalous date label','The date often attributed to this tape is February 29, 1990. That date is invalid on a Gregorian calendar. Its placement here is approximate.'],
-  ['motion','1990-03','Surveillance recordings','Approximate month','Recording contains multiple motion-camera clips.'],
+  ['info','1990-02-29','Surveyor is separated','Anomalous date label','The upload description gives February 29, 1990. That date is invalid on a Gregorian calendar. Its placement here is approximate.'],
+  ['motion','1990-03-05','Surveillance recordings','YouTube description','The upload description dates the compilation of motion-camera clips to March 5, 1990.'],
   ['archive','1990-03-11','Date encoded in archive filename','Filename · interpretation','The filename suggests March 11, 1990. It may designate source material. The compilation date is a separate question.'],
-  ['pit','1990-05-06','Division 14 expedition','Placed with Report','The chronology places the expedition near the review, whose description supplies May 6.'],
+  ['pit','1990-05-06','Division 14 expedition','YouTube description','The episode description gives May 6, 1990, the same date as the review in Report.'],
   ['report','1990-05-06','Division 14 footage reviewed','YouTube description','The episode description gives May 6, 1990.'],
   ['present','1990-05-08','Briefing interrupted at the outpost','Reported story date','Presentation gives another perspective on the end of Informational Video.'],
   ['recording','1990-05','Beck discusses Tench','Approximate month','Placed after the return based on the subject of the call.'],
