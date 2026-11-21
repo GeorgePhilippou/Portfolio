@@ -236,8 +236,6 @@ body{background:#202d51}
 .review-badge:hover{background:#faf1d7}
 .review-badge b,.review-badge small{display:block;font:700 .7rem/1.2 var(--mono)}
 .review-badge small{margin-top:3px;color:#62563d}
-.program-seal{display:grid;justify-items:center;align-content:center;gap:2px;flex:none;width:43px;height:43px;border:1px solid #bca26c;border-radius:50%;box-shadow:inset 0 0 0 2px #252e56,inset 0 0 0 3px #bca26c;color:#f3dc9e;background:#252e56;font:.63rem/1 var(--mono)}
-.program-seal i{width:17px;height:8px;border:1px solid #d8c69a;background:repeating-linear-gradient(90deg,#ddad73 0 2px,#3b507b 2px 4px);clip-path:polygon(0 0,100% 0,95% 68%,50% 100%,5% 68%)}
 .operator-status{display:flex;justify-content:space-between;gap:11px;padding:5px 12px;background:#ecebdf;border:1px solid #81879b;color:#354260;font:700 .75rem/1.3 var(--mono)}
 .operator-status span:first-child{white-space:nowrap}
 .operator-status span:last-child{overflow-wrap:anywhere;text-align:right}
@@ -255,14 +253,7 @@ body{background:#202d51}
 .briefing-monitor{align-self:start}
 .briefing-monitor .screen img{min-height:0;max-height:240px;aspect-ratio:4/3}
 .briefing-monitor .monitor-caption{background:#e1e2e8}
-body.login-pending .login-shell{width:min(100%,810px);box-shadow:10px 11px 0 #121b35a8}
-.login-layout{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
-.login-monitor{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;margin:0;background:#0c1325;border-right:2px solid #8a91a8}
-.login-monitor img{width:100%;aspect-ratio:4/3;max-height:360px;object-fit:cover;image-rendering:auto}
-.login-monitor figcaption{display:flex;justify-content:space-between;gap:7px;padding:8px 9px;color:#e6dbc7;background:#18263f;font:700 .72rem/1.25 var(--mono)}
-.login-monitor::after{content:"";position:absolute;inset:0 0 30px;pointer-events:none;background:repeating-linear-gradient(0deg,#07122525 0 1px,transparent 1px 4px)}
-.login-identity .program-seal{width:57px;height:57px;font-size:.78rem;gap:3px}
-.login-identity .program-seal i{width:21px;height:10px}
+body.login-pending .login-shell{width:min(100%,435px);box-shadow:10px 11px 0 #121b35a8}
 .login-panel{align-self:center}
 .login-footer{background:#e6e4d8}
 .compare-pairs,.compare-controls{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:0 0 11px}
@@ -277,6 +268,10 @@ body.login-pending .login-shell{width:min(100%,810px);box-shadow:10px 11px 0 #12
 .comparison-monitor .exhibit-action img{height:clamp(170px,27vw,335px);aspect-ratio:auto}
 .comparison-monitor .panel-body{min-height:136px}
 .compare-notes{margin-top:10px}
-@media(max-width:1000px){.review-badge{display:none}}
 @media(max-width:800px){.workstation-desk{grid-template-columns:1fr}.operator-desk{grid-template-columns:repeat(2,minmax(0,1fr))}.briefing-monitor .screen img{max-height:220px}}
-@media(max-width:580px){.mast .brand-img{width:65px;height:44px}.mast .terminal-name{font-size:.95rem}.nav-section{display:contents}.nav-heading{display:none}.login-layout{grid-template-columns:1fr}.login-monitor{border-right:0}.login-monitor img{max-height:125px}.comparison-grid{grid-template-columns:1fr}.comparison-monitor .panel-body{min-height:0}.comparison-monitor .exhibit-action img{height:200px}.operator-status{font-size:.65rem}}
+@media(max-width:580px){.mast .brand-img{width:65px;height:44px}.mast .terminal-name{font-size:.95rem}.nav-section{display:contents}.nav-heading{display:none}.comparison-grid{grid-template-columns:1fr}.comparison-monitor .panel-body{min-height:0}.comparison-monitor .exhibit-action img{height:200px}.operator-status{font-size:.65rem}}
+.login-identity{display:grid;justify-items:center;gap:8px;text-align:center;padding:4px 0 14px}
+.login-logo{display:block;width:108px;height:82px;object-fit:contain}
+.login-identity h1{font-size:clamp(1.5rem,6vw,2rem)}
+.review-watermark{width:42px;height:42px;flex:none;border:1px solid #85836c;border-radius:50%;background:#70784a url('evidence/present-frame-385.webp') no-repeat -269px -7px / 320px 240px}
+@media(max-width:860px){.review-badge{padding:2px}.review-words{display:none}.review-watermark{width:36px;height:36px;background-position:-272px -10px}}
