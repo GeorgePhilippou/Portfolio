@@ -1,5 +1,5 @@
 const allDossiers = [...dossiers, ...featureDossiers];
-const allEvents = [...events, featureEvent];
+const allEvents = [...events, ...featureEvents];
 const allEdges = [...edges, ...featureEdges];
 const allBriefings = {...briefings, ...featureBriefings};
 const records = [...videos, featureFilm, ...allDossiers];
@@ -50,7 +50,7 @@ let videoFilter = 'all';
 let edgeFilter = 'all';
 let mapRecord = 'ff1';
 let resultsMessage = '';
-let filmScroll = 0;
+const filmScroll = new Map();
 let compareFocus = '';
 
 function setLoginState(isSignedIn) {
@@ -96,14 +96,14 @@ operatorForm.addEventListener('submit',event => {
   event.preventDefault();
   const missing = [...operatorFields.keys()].find(field => !progress.get(field));
   if (missing) {
-    loginFeedback.textContent = 'Type a key in both fields to continue.';
+    loginFeedback.textContent = missing === operatorId ? 'Operator ID required.' : 'Access code required.';
     missing.focus();
     return;
   }
   try { sessionStorage.setItem(sessionKey,'open'); } catch {}
   setLoginState(true);
   render();
-  window.scrollTo(0,0);
+  if (!/^#timeline\/[^/]+\/[^/]+$/.test(location.hash)) window.scrollTo(0,0);
   main.focus({preventScroll:true});
 });
 
@@ -184,7 +184,7 @@ function evidenceImage(item, className = '', eager = false) {
 }
 
 function evidenceCaption(item,key) {
-  const video = byId[item.video];
+  const video = item.video === featureTrailer.id ? featureTrailer : byId[item.video];
   return `<span class="meta">${e(item.kind)} · ${e(item.credit ?? 'Kane Parsons')}</span><p>${e(item.note)}</p><div class="exhibit-links">
     ${playButton(video,item.seconds == null ? 'Play source video' : 'Play from this frame',item.seconds)}
     ${watch(video, `Source tape · ${video.title}`, item.seconds)}
@@ -260,6 +260,23 @@ function companionCard(record,label) {
   </a>`;
 }
 
+function filmstrip({id,title,count,columns,options,jumpLabel,caption='',story=false}) {
+  return `<section class="panel film-panel${story ? ' story-film-panel' : ''}" aria-label="${e(title)}">
+    <div class="panel-bar"><span>${e(title)}</span><span>${e(count)}</span></div>
+    <div class="film-tools">
+      <button class="button" type="button" data-film-scroll="-1">Scroll left</button>
+      <button class="button" type="button" data-film-scroll="1">Scroll right</button>
+      <label for="film-jump-${id}">${e(jumpLabel)}</label>
+      <select id="film-jump-${id}" data-film-jump><option value="">Choose a record</option>${options.map(([value,label]) =>
+        `<option value="${e(value)}">${e(label)}</option>`).join('')}</select>
+    </div>
+    <div class="film-viewport" data-film-track="${id}" tabindex="0" aria-label="${e(title)} · horizontal track">
+      <ol class="film-track">${columns}</ol>
+    </div>
+    ${caption ? `<div class="monitor-caption film-key">${caption}</div>` : ''}
+  </section>`;
+}
+
 function releaseFilmstrip() {
   const attached = new Set(companionEdges.map(edge => edge.to));
   const releases = [...videos.filter(record => !attached.has(record.id)), featureFilm].sort((a,b) => a.release.localeCompare(b.release));
@@ -291,48 +308,94 @@ function releaseFilmstrip() {
       </article>
     </li>`;
   }).join('');
-  return `<section class="panel film-panel" aria-label="Release filmstrip">
-    <div class="panel-bar"><span>Release filmstrip</span><span>${mainTapes.length} main episodes</span></div>
-    <div class="film-tools">
-      <button class="button" type="button" data-film-scroll="-1">Scroll left</button>
-      <button class="button" type="button" data-film-scroll="1">Scroll right</button>
-      <label for="film-jump">Jump to release</label>
-      <select id="film-jump"><option value="">Choose a release</option>${releases.filter(record => mainTapes.includes(record) || record === featureFilm).map(record =>
-        `<option value="${record.id}">${e(record.title)}</option>`).join('')}</select>
-    </div>
-    <div class="film-viewport" tabindex="0" aria-label="Scrollable release filmstrip">
-      <ol class="film-track">${columns}</ol>
-    </div>
-    <div class="monitor-caption film-key"><span><b>Above</b> · Companion files and supplemental material</span><span><b>Below</b> · Main episodes and the feature film</span></div>
-  </section>`;
+  return filmstrip({
+    id:'releases', title:'Release filmstrip', count:`${mainTapes.length} main episodes`, columns,
+    options:releases.filter(record => mainTapes.includes(record) || record === featureFilm).map(record => [record.id,record.title]),
+    jumpLabel:'Jump to release',
+    caption:'<span><b>Above</b> · Companion files and supplemental material</span><span><b>Below</b> · Main episodes and the feature film</span>'
+  });
+}
+
+function storyCard(event) {
+  const record = byId[event.video];
+  const frame = event.frame ? evidence[event.frame] : featureImage;
+  const context = evidence[event.context];
+  const when = event.date ? dateLabel(event.date) : 'Date unknown';
+  const imageLabel = event.frame ? frame.kind : 'Official trailer image · A24';
+  const date = event.date ? `<time datetime="${e(event.date)}">${e(when)}</time>` : `<span class="story-date">${e(when)}</span>`;
+  const playback = playButton(record === featureFilm ? featureTrailer : record,
+    record === featureFilm ? 'Trailer' : frame.seconds == null ? 'Play source' : 'Play from frame',frame.seconds);
+  const related = event.refs.map(id => recordLink(id)).join('');
+  return `<li class="film-column story-column">
+    <div class="film-upper">${context ? `<button type="button" data-exhibit="${e(event.context)}" aria-label="Enlarge ${e(context.title)}" class="film-companion story-context">
+      ${evidenceImage(context)}<span><strong>${e(context.title)}</strong><small>${e(context.kind)}</small></span>
+    </button>` : ''}</div>
+    <div class="film-axis"></div>
+    <article class="film-card" data-film="${event.id}">
+      <a class="film-record" href="#record/${record.id}">
+        ${evidenceImage(frame)}<span class="story-image-label">${e(imageLabel)}</span>
+        ${date}<strong>${e(event.title)}</strong>
+      </a>
+      <div class="story-incident"><span class="tag">${e(event.basis)}</span><p>${e(event.note)}</p>
+        <div class="story-related">${related}${event.source ? sourceLink(event.source[1],event.source[0]) : ''}</div>
+      </div>
+      <div class="film-actions">${playback}${recordLink(record.id,record === featureFilm ? 'Film file' : 'Tape briefing')}${event.frame && frame.seconds != null ? `<button class="button" type="button" data-exhibit="${event.frame}">Enlarge frame</button>` : ''}</div>
+    </article>
+  </li>`;
 }
 
 function storyChronology() {
-  const eventRow = event => `<a class="record timeline-row" href="#record/${event.video}"><time>${e(dateLabel(event.date))}</time><span class="record-main"><strong>${e(event.title)}</strong><small>${e(byId[event.video].title)} · ${e(event.note)}</small></span><span class="tag">${e(event.basis)}</span></a>`;
-  const orderDate = event => event.video === 'recording' ? '1990-05-08' : event.date;
-  const dated = allEvents.filter(event => event.date && event.basis !== 'Relative date' && event !== featureEvent).sort((a,b) => orderDate(a).localeCompare(orderDate(b)));
-  const relative = allEvents.filter(event => event.basis === 'Relative date' || event === featureEvent);
-  const undated = allEvents.filter(event => !event.date);
-  return `<div class="record-list">${dated.map(eventRow).join('')}</div>
-    <div class="section-line"><h2>Approximate dates and sequences</h2></div><div class="record-list">${relative.map(eventRow).join('')}</div>
-    <div class="section-line"><h2>Unplaced events</h2></div><div class="record-list">${undated.map(eventRow).join('')}</div>`;
+  const dated = [];
+  const relative = [];
+  const undated = [];
+  for (const event of allEvents) {
+    if (!event.date) undated.push(event);
+    else if (event.group === 'relative' || event.basis.startsWith('Relative date')) relative.push(event);
+    else dated.push(event);
+  }
+  const sortDate = event => event.id === 'clyde-calls-beck' ? '1990-05-08' : event.date;
+  dated.sort((a,b) => sortDate(a).localeCompare(sortDate(b)));
+  const groups = [
+    {id:'dated',title:'Dated incidents and records',events:dated,
+      caption:'<span><b>Above</b> · Context and comparison frames</span><span><b>Below</b> · Incidents ordered by the best available date</span>'},
+    {id:'relative',title:'Approximate dates and sequences',events:relative,
+      caption:'The film has an approximate year. Its position relative to the dated A-Sync tapes is open.'},
+    {id:'undated',title:'Unplaced incidents and files',events:undated,
+      caption:'Some incidents have a known local sequence. Their position in the wider chronology is open.'}
+  ];
+  return groups.map(group => filmstrip({
+    id:group.id, title:group.title, count:`${group.events.length} records`, story:true,
+    columns:group.events.map(storyCard).join(''),
+    options:group.events.map(event => [event.id,`${event.date ? dateLabel(event.date) + ' · ' : ''}${event.title}`]),
+    jumpLabel:'Jump to incident', caption:group.caption
+  })).join('');
 }
 
 function timeline(mode) {
   const isStory = mode === 'story';
-  return title('ARCHIVE / CHRONOLOGY','Timeline',isStory ? 'Reconstruct the order of events from dates in the footage, upload descriptions, and secondary references.' : 'Follow the main series and feature film in release order. Linked files sit above their related episodes, while standalone supplements sit between releases.') +
+  return title('ARCHIVE / CHRONOLOGY','Timeline',isStory ? 'Trace civilian entries, A-Sync’s experiments and surveys, and sightings across the tapes and the feature film.' : 'Follow the main series and feature film in release order. Linked files sit above their related episodes, while standalone supplements sit between releases.') +
     `<nav class="toolbar timeline-switch" aria-label="Timeline order"><a class="button" href="#timeline/release" ${isStory ? '' : 'aria-current="page"'}>YouTube release order</a><a class="button" href="#timeline/story" ${isStory ? 'aria-current="page"' : ''}>In-story chronology</a></nav>` +
     (isStory ? storyChronology() : releaseFilmstrip());
 }
 
-function jumpToFilm(id) {
-  if (!byId[id]?.release) return;
-  const viewport = main.querySelector('.film-viewport');
-  const item = viewport?.querySelector(`[data-film="${id}"]`);
-  if (!item) return;
-  const bounds = viewport.getBoundingClientRect();
-  viewport.scrollLeft += item.getBoundingClientRect().left - bounds.left - 14;
-  main.querySelector('#film-jump').value = mainTapes.includes(byId[id]) || id === featureFilm.id ? id : '';
+function jumpToFilm(panel,id) {
+  const item = [...panel.querySelectorAll('[data-film]')].find(card => card.dataset.film === id);
+  if (!item) return null;
+  const viewport = panel.querySelector('.film-viewport');
+  viewport.scrollLeft += item.getBoundingClientRect().left - viewport.getBoundingClientRect().left - 14;
+  const select = panel.querySelector('[data-film-jump]');
+  if ([...select.options].some(option => option.value === id)) select.value = id;
+  return item;
+}
+
+function showTimelineTarget(id) {
+  for (const panel of main.querySelectorAll('.film-panel')) {
+    const item = jumpToFilm(panel,id);
+    if (item) {
+      panel.scrollIntoView({block:'nearest'});
+      return;
+    }
+  }
 }
 
 function tapeNavigation(record) {
@@ -419,7 +482,7 @@ function recordPage(record) {
   const mapArea = surveyAreas.find(area => area.id === record.id || area.stages.some(stage=>stage.video === record.id));
   const mapStage = mapArea?.stages.find(stage=>stage.video === record.id)?.id ?? mapArea?.start;
   const actions = `<div class="toolbar">${isVideo ? playButton(record) : ''}${mapArea ? button('Locate in Complex map',`#map/${mapArea.id}/${mapStage}`) : ''}<button class="button" data-pin="${record.id}" aria-pressed="${pin}">${pin ? 'Pinned to case board' : 'Pin to case board'}</button>${isVideo ? watch(record) : ''}</div>`;
-  const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p></article>`).join(''),'doc') : '';
+  const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p><a href="#timeline/story/${event.id}">View on chronology</a></article>`).join(''),'doc') : '';
   const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : playButton(record,'Play from this cue',scene.seconds)}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
   const associations = isVideo ? sightings : record.refs.map(id => byId[id]);
   return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + (isVideo ? tapeNavigation(record) : '') + (isFeature ? featureMedia() : '') + briefingPanel(record) + evidenceGallery(record) + datePanel + scenePanel +
@@ -519,11 +582,11 @@ function save() {
 
 function render() {
   const [page,id,stage] = (location.hash.slice(1) || 'overview').split('/');
-  const isFilmstrip = page === 'timeline' && id !== 'story';
+  const isFilmstrip = page === 'timeline';
   const isSurvey = page === 'map';
   const isCompare = page === 'compare';
   const fullWidth = isFilmstrip || isSurvey || isCompare;
-  filmScroll = main.querySelector('.film-viewport')?.scrollLeft ?? filmScroll;
+  for (const track of main.querySelectorAll('[data-film-track]')) filmScroll.set(track.dataset.filmTrack,track.scrollLeft);
   const entry = page === 'feature' ? featureFilm : (page === 'record' ? byId[id] : null);
   const active = entry?.group ?? page;
   const views = {overview, videos:videoArchive, timeline:()=>timeline(id), map:()=>surveyMap(id,stage) + routePanel(featureRoute), compare:()=>comparisonView(id,stage), people:()=>dossierIndex('people'),
@@ -539,8 +602,8 @@ function render() {
   inspector.hidden = fullWidth;
   if (isSurvey) initSurvey(id,stage);
   if (isFilmstrip) {
-    main.querySelector('.film-viewport').scrollLeft = filmScroll;
-    if (stage) jumpToFilm(stage);
+    for (const track of main.querySelectorAll('[data-film-track]')) track.scrollLeft = filmScroll.get(track.dataset.filmTrack) ?? 0;
+    if (stage) showTimelineTarget(stage);
   } else if (!fullWidth) {
     inspector.innerHTML = entry ? recordInspector(entry) : dashboardInspector();
   }
@@ -558,7 +621,8 @@ window.addEventListener('hashchange', () => {
   if (lightbox.open) lightbox.close();
   resultsMessage = '';
   render();
-  window.scrollTo(0,0);
+  const [page,,stage] = location.hash.slice(1).split('/');
+  if (!(page === 'timeline' && stage)) window.scrollTo(0,0);
   if (compareFocus && location.hash.startsWith('#compare/')) {
     main.querySelector('#compare-'+compareFocus)?.focus({preventScroll:true});
   } else if (location.hash !== '#search') main.focus({preventScroll:true});
@@ -603,11 +667,12 @@ main.addEventListener('click', event => {
     return;
   }
   if (scrollDirection) {
-    const viewport = main.querySelector('.film-viewport');
+    const viewport = control.closest('.film-panel').querySelector('.film-viewport');
     viewport.scrollBy({left:Number(scrollDirection)*viewport.clientWidth*.8});
     return;
   }
   if (exhibit) {
+    event.preventDefault();
     const item = evidence[exhibit];
     lightbox.innerHTML = `<div class="panel-bar"><span id="exhibit-title">${e(item.title)}</span><button class="button" data-close-exhibit autofocus>Close</button></div>
       ${evidenceImage(item,'',true)}<div class="panel-body">${evidenceCaption(item,exhibit)}</div>`;
@@ -639,8 +704,8 @@ main.addEventListener('change', event => {
     location.hash = compareSide === 'A' ? comparisonURL(value,peer) : comparisonURL(peer,value);
     return;
   }
-  if (id === 'film-jump') {
-    jumpToFilm(value);
+  if (event.target.hasAttribute('data-film-jump')) {
+    jumpToFilm(event.target.closest('.film-panel'),value);
     return;
   }
   if (id === 'edge-type') edgeFilter = value;

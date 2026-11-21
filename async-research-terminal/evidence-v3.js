@@ -12,6 +12,19 @@ const evidence = Object.fromEntries(videos.map(video => [`upload-${video.id}`, {
 const evidenceFor = Object.fromEntries(videos.map(video => [video.id, [`upload-${video.id}`]]));
 
 const storyboardExhibits = [
+  ['missing-notice-frame','missing',28,'Missing-person notice','A missing-person poster in the opening montage.'],
+  ['recovered-remains','missing',136,'Recovery sequence','The survey team’s view near the wall during the discovery sequence.'],
+  ['loma-prieta-news','fault',20,'Loma Prieta news coverage','An aerial news shot from the linked archival broadcast.'],
+  ['autopsy-frame','autopsy',30,'Autopsy recording','The examination tape shows the body on a table.'],
+  ['test-apparatus','third',84,'Apparatus during the third test','Light fills the opening during the third test.'],
+  ['test-setup','third',41,'Third Test equipment','Equipment footage accompanying the account of A-Sync’s magnetic distortion programme.'],
+  ['tench-survey-frame','info',130,'Survey team inside the Complex','Suited staff seen on Tench’s camera during the survey.'],
+  ['recording-news','recording',66,'Newspaper insert','The call tape includes a newspaper image associated with the Tench case.'],
+  ['lighting-field','lighting',55,'Lighting field survey','Suited A-Sync researchers inside the Complex during the lighting survey.'],
+  ['camera-outside','ff1',525,'Outside view from the falling camera','Trees enter the frame during the closing descent.'],
+  ['film-clark-frame','feature-trailer',28,'Clark in the Complex','Clark inside the yellow rooms in the official A24 trailer.'],
+  ['film-mary-frame','feature-trailer',116,'Mary in the Complex','Mary in a fluorescent-lit room in the official A24 trailer.'],
+  ['film-async-frame','feature-trailer',70,'Suited personnel','Suited personnel shown in the official A24 trailer.'],
   ['office','ff1',55,'Yellow office rooms','Square pillars and fluorescent fixtures across a yellow office interior.',['yellow']],
   ['wall','ff1',210,'Wall markings','The wall at the end of a passage bears several drawn symbols.',['yellow']],
   ['figure-gap','ff1',490,'Figure through a narrow opening','A dark form is partly visible through the slit during the pursuit. Use the upload thumbnail for a wider view of the figure.',['figure1']],
@@ -43,10 +56,13 @@ const storyboardExhibits = [
   ['retail-pursuit','everything',940,'Retail pursuit sequence','A suited researcher is visible in the foreground. Use the source tape to inspect the brief encounter around this moment.',['retail-figure']]
 ];
 
-for (const [id,video,seconds,title,note,subjects] of storyboardExhibits) {
+for (const [id,video,seconds,title,note,subjects=[]] of storyboardExhibits) {
   const timestamp = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2,'0')}`;
-  evidence[id] = {file:`${video}-frame-${seconds}`, video, seconds, title, alt:note, note, kind:`Source frame · ${timestamp}`};
-  for (const subject of [video,...subjects]) (evidenceFor[subject] ??= []).push(id);
+  const isTrailer = video === 'feature-trailer';
+  const file = `${isTrailer ? 'trailer' : video}-frame-${seconds}`;
+  evidence[id] = {file, video, seconds, title, alt:note, note, kind:`${isTrailer ? 'Official trailer frame' : 'Source frame'} · ${timestamp}`,
+    ...(isTrailer ? {credit:'A24'} : {})};
+  for (const subject of [isTrailer ? 'feature' : video,...subjects]) (evidenceFor[subject] ??= []).push(id);
 }
 
 evidence['upload-ff1'].note = 'The creator-selected thumbnail shows a tall figure between pillars. Its exact timestamp is unassigned.';

@@ -64,11 +64,21 @@ const featureBriefings = {
   }]))
 };
 
-const featureEvent = {
-  video: 'feature', date: '1990', title: 'The furniture showroom passage is discovered',
-  basis: 'Setting · approximate year',
-  note: 'A24’s production notes set the feature around 1990. Its order relative to individual 1990 field tapes is unassigned.'
-};
+const featureEvents = [
+  ['showroom-entry','Clark discovers the showroom passage',
+    'Clark finds a doorway beneath his furniture showroom and asks Kat and Bobby to help document what lies beyond it.',
+    ['film-clark','film-showroom','film-kat','film-bobby'],'film-clark-frame'],
+  ['clark-missing','Mary goes looking for Clark',
+    'When Clark disappears, his therapist Dr. Mary Kline follows him into the Complex. Her route includes distorted echoes of familiar places.',
+    ['film-mary','film-replicas'],'film-mary-frame'],
+  ['film-async','A-Sync encounters Mary',
+    'A-Sync personnel recover Mary, and Phil questions her about what she saw. The feature file preserves the ending and sightings in its spoiler section.',
+    ['film-phil','async','film-still-lifes'],'film-async-frame']
+].map(([id,title,note,refs,frame]) => ({
+  id, video:'feature', date:'1990', title, note, refs, frame,
+  basis:'Feature · approximate year',
+  group:'relative'
+}));
 
 const featureEdges = [
   ['feature', 'first', 'Same continuity', 'A24’s production notes place A-Sync’s 1989 opening in the web series and the feature’s civilian discovery around 1990.', 'Documented'],
