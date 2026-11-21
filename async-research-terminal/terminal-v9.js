@@ -99,7 +99,8 @@ operatorForm.addEventListener('submit',event => {
   try { sessionStorage.setItem(sessionKey,'open'); } catch {}
   setLoginState(true);
   render();
-  main.focus();
+  window.scrollTo(0,0);
+  main.focus({preventScroll:true});
 });
 
 document.querySelector('#sign-out').addEventListener('click',() => {
