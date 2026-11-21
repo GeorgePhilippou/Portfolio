@@ -2,7 +2,7 @@ const records = [...videos, ...dossiers];
 const byId = Object.fromEntries(records.map(record => [record.id,record]));
 const tabs = [
   ['overview','▣','Overview'],['videos','▤','Video archive'],['timeline','◷','Timeline'],
-  ['locations','⌗','Complex survey'],['people','◇','Personnel'],['entities','◉','Sightings'],
+  ['map','▦','Complex map'],['locations','⌗','Complex survey'],['people','◇','Personnel'],['entities','◉','Sightings'],
   ['links','⋈','Connections'],['board','▧','Case board']
 ];
 const labels = {videos:'Video',people:'Personnel',locations:'Location',entities:'Sighting'};
@@ -177,9 +177,12 @@ function evidenceCaption(item) {
 }
 
 function evidenceGallery(record) {
-  const items = evidenceFor[record.id] ?? [];
+  return exhibitGallery(evidenceFor[record.id] ?? []);
+}
+
+function exhibitGallery(items,heading='Visual evidence') {
   if (!items.length) return '';
-  return panel('Visual evidence', `<div class="evidence-grid">${items.map(key => {
+  return panel(heading, `<div class="evidence-grid">${items.map(key => {
     const item = evidence[key];
     return `<figure class="exhibit">
       <button class="exhibit-action" data-exhibit="${key}" aria-label="Enlarge ${e(item.title)}">${evidenceImage(item)}</button>
@@ -215,7 +218,7 @@ function overview() {
     <div class="section-line"><h2>Investigation files</h2><a href="#videos">All ${videos.length} videos</a></div>
     <div class="record-list">${row(byId.ff1,'Recovered footage · description leads to a second file','CIVILIAN')}${row(byId.first,'Threshold experiment · compare with faultline.mov','A-SYNC')}${row(byId.pit,'Field expedition · Room 14D and the house encounter','A-SYNC')}${row(byId.beck,'Personnel dossier · experiment records and internal calls','DOSSIER')}</div>
     <div class="section-line"><h2>Open an investigation</h2></div><div class="overview-grid">
-      <a href="#timeline"><strong>◷</strong>Reconstruct events</a><a href="#locations"><strong>⌗</strong>Follow field routes</a><a href="#board"><strong>▧</strong>Build a case</a>
+      <a href="#timeline"><strong>◷</strong>Reconstruct events</a><a href="#map"><strong>▦</strong>Explore the Complex map</a><a href="#board"><strong>▧</strong>Build a case</a>
     </div>`;
 }
 
@@ -247,8 +250,66 @@ function dossierIndex(group) {
   const diagrams = group === 'locations' ? routes.map(route => `<section class="panel doc">
     <div class="panel-bar">${e(route.title)}</div><div class="route route-bg">${route.nodes.map(([id,label,type],index) => `<a href="#record/${id}"><span class="tag">STOP ${index+1}</span><strong>${e(label)}</strong><small>${e(type)}</small></a>`).join('')}</div>
     <div class="monitor-caption">${e(route.description)}</div></section>`).join('') : '';
-  return title(...header) + listing(dossiers.filter(record => record.group === group)) +
+  return title(...header) + (diagrams ? `<div class="toolbar">${button('Open Complex map','#map')}</div>` : '') +
+    listing(dossiers.filter(record => record.group === group)) +
     (diagrams ? '<div class="section-line"><h2>Survey routes</h2></div>' + diagrams : '');
+}
+
+function thresholdPlot(stage) {
+  const isPlan = stage.id === 'motion';
+  const notes = {
+    first:'The doorway is the verified landmark in this tape. The pale grid is the later March plan, shown for orientation.',
+    info:'The tape supplies an approach to the outpost and a drawing. Its position and footprint remain unplaced on this schematic.',
+    motion:'Redrawn from the camera plan at 0:54 and 1:04. Repeated cross-shaped pillars flank the highlighted lane as it runs toward the top of the page.',
+    present:'The May tape shows the developed outpost. The camera-plan grid stays visible as a March reference.'
+  };
+  return `<div class="survey-graphic threshold-plot route-bg" data-stage="${stage.id}">
+    <div class="survey-plan-title">${isPlan ? 'MARCH CAMERA PLAN · SCHEMATIC' : 'MARCH PLAN · ORIENTATION REFERENCE'}</div>
+    <div class="plan-grid" aria-hidden="true">${'<i></i>'.repeat(20)}</div>
+    <div class="plan-lane" aria-hidden="true"></div>
+    ${isPlan ? '<div class="plan-marker plan-camera">C1</div><div class="plan-marker plan-camera-side">C2</div>' : ''}
+    <a href="#record/yellow" class="plan-marker plan-chamber">Main Chamber</a>
+    <a href="#record/threshold" class="plan-marker plan-threshold">Threshold</a>
+    <div class="plan-facility">A-SYNC FACILITY SIDE</div>
+  </div><p class="survey-legend"><strong>Reading the plan.</strong> ${e(notes[stage.id])} Distances and compass bearings are unknown.</p>`;
+}
+
+function divisionPlot(stage) {
+  const bridged = stage.id === 'reunion' || stage.id === 'static';
+  return `<div class="division-plot route-bg" data-stage="${stage.id}">
+    <div class="division-approach"><span class="tag">Approach</span><strong>${stage.id === 'report' ? 'Partition closed' : bridged ? 'Approach reopened' : 'Survey enters'}</strong></div>
+    <div class="division-connect" aria-hidden="true"></div>
+    <div class="pit-room">
+      <h3>${recordLink('division','Room 14D')}</h3>
+      <div class="pit-grid" aria-hidden="true">${'<i></i>'.repeat(35)}${bridged ? '<span class="pit-walkway"></span>' : ''}</div>
+      <span class="meta">${bridged ? 'Walkway across pits' : 'Open pits'}</span>
+    </div>
+    <div class="division-connect" aria-hidden="true"></div>
+    <div class="division-branches">
+      ${stage.id === 'static' ? recordLink('static','Beyond far door') : recordLink('pit','Far door')}
+      ${stage.id === 'reunion' ? recordLink('reunion','Room 14C survey') : ''}
+      ${stage.id === 'pit' ? recordLink('street','Fall to the red-lit street') : ''}
+    </div>
+  </div><p class="survey-legend"><strong>Route schematic.</strong> The pit grid is a landmark. The dashed connectors show sequence with unknown spacing and bearings.${stage.id === 'reunion' ? ' Room 14C is a parallel survey, shown beside the walkway operation.' : ''}</p>`;
+}
+
+function surveyMap(areaId,stageId) {
+  const area = surveyAreas.find(item => item.id === areaId) ?? surveyAreas[0];
+  const stage = area.stages.find(item => item.id === stageId) ?? area.stages.find(item => item.id === area.start);
+  const video = byId[stage.video];
+  const diagram = area.id === 'threshold' ? thresholdPlot(stage) : area.id === 'division' ? divisionPlot(stage) :
+    `<div class="route route-bg">${stage.stops.map(([label,id]) => recordLink(id,label)).join('')}</div><p class="survey-legend"><strong>Recorded sequence.</strong> These stops have no assigned position on the Threshold plan.</p>`;
+  const firstFrame = evidence[stage.frames[0]];
+  return title('SURVEY / MAP EVIDENCE','Complex map','Compare the local plans and the routes shown on tape. Select a recording to see what it adds.') +
+    `<nav aria-label="Map area" class="survey-tabs">${surveyAreas.map(item => `<a class="button" href="#map/${item.id}/${item.start}" ${item.id === area.id ? 'aria-current="true"' : ''}>${e(item.title)}</a>`).join('')}</nav>
+    <nav aria-label="Map recordings" class="survey-timeline">${area.stages.map(item => `<a href="#map/${area.id}/${item.id}" ${item.id === stage.id ? 'aria-current="true"' : ''}><span class="meta">${e(item.when)}</span><strong>${e(item.label)}</strong><span>${e(byId[item.video].title)}</span></a>`).join('')}</nav>
+    ${panel(area.title,diagram,'doc survey-panel')}
+    ${panel('What this tape adds',`<h2>${e(video.title)}</h2><p>${e(stage.change)}</p><p class="muted">${e(stage.limit)}</p><div class="toolbar survey-actions">${playButton(video,`Play map cue · ${cueStamp(firstFrame.seconds)}`,firstFrame.seconds)}${recordLink(video.id,'Open tape briefing')}</div>`,'doc')}
+    ${exhibitGallery(stage.frames,'Original footage and diagrams')}
+    ${panel('Further comparison',`<p>Community reconstructions compare wall and pillar alignments across more recordings. Use the episode frames above to check any proposed match.</p><div class="source-list">
+      ${sourceLink('https://imgur.com/a/maps-of-kane-pixels-backrooms-KLYW2Xk','Community route diagrams · diomand20')}
+      ${sourceLink('https://www.reddit.com/r/KanePixelsBackrooms/comments/tysj9f/i_spent_the_last_3_weeks_mapping_out_the/','Mapping notes and disputed wall matches')}
+    </div>`,'doc')}`;
 }
 
 function connectionCard(edge, showSource=true) {
@@ -375,10 +436,10 @@ function save() {
 }
 
 function render() {
-  const [page,id] = (location.hash.slice(1) || 'overview').split('/');
+  const [page,id,stage] = (location.hash.slice(1) || 'overview').split('/');
   const entry = page === 'record' ? byId[id] : null;
   const active = entry?.group ?? page;
-  const views = {overview, videos:videoArchive, timeline, people:()=>dossierIndex('people'),
+  const views = {overview, videos:videoArchive, timeline, map:()=>surveyMap(id,stage), people:()=>dossierIndex('people'),
     locations:()=>dossierIndex('locations'), entities:()=>dossierIndex('entities'),
     links:connections, board, search:searchResults};
   nav.innerHTML = tabs.map(([key,symbol,label]) => `<a class="nav" href="#${key}" ${key === active ? 'aria-current="page"' : ''}><i aria-hidden="true">${symbol}</i>${label}</a>`).join('');

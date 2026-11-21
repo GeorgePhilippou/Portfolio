@@ -149,3 +149,37 @@ body.login-pending .login-shell{display:block;width:min(100%,475px);padding:0;ba
 .briefing-sources .button{min-height:25px;padding:3px 5px;font-size:.79rem}
 .record.has-thumb{align-items:start}
 .record.has-thumb .tag{align-self:center}
+.survey-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.survey-tabs a[aria-current=true],.survey-timeline a[aria-current=true]{background:var(--blue);color:white}
+.survey-timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:0 0 12px}
+.survey-timeline a{min-width:0;display:grid;align-content:start;gap:3px;padding:7px 8px;border:1px solid var(--line);background:var(--paper);font-size:.79rem;text-decoration:none;overflow-wrap:anywhere}
+.survey-timeline a:hover:not([aria-current=true]){background:#e1e3f6}
+.survey-timeline strong{font-size:.88rem}
+.survey-panel .panel-body{padding:8px}
+.survey-graphic{position:relative;isolation:isolate;min-height:280px;height:clamp(280px,38vw,385px);overflow:hidden;border:1px solid #8089a4}
+.survey-plan-title{position:absolute;z-index:2;top:8px;left:8px;background:var(--paper);border:1px solid #8189a4;padding:3px 6px;font:700 .72rem var(--mono)}
+.plan-grid{position:absolute;inset:42px 4% 53px;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);align-items:center;justify-items:center;outline:1px solid #848da5;background:#f3f4f72c}
+.plan-grid i{width:clamp(18px,5vw,39px);aspect-ratio:1;background:#637391;clip-path:polygon(33% 0,67% 0,67% 33%,100% 33%,100% 67%,67% 67%,67% 100%,33% 100%,33% 67%,0 67%,0 33%,33% 33%)}
+.threshold-plot:not([data-stage=motion]) .plan-grid{opacity:.48}
+.plan-lane{position:absolute;top:44px;bottom:48px;left:26%;width:15%;background:#f1cd4670;border:1px dashed #897325;z-index:-1}
+.threshold-plot[data-stage=first] .plan-lane{top:auto;height:68px}
+.plan-marker{position:absolute;text-align:center;padding:3px 6px;background:#f5f5ed;border:1px solid #707f9a;font:700 .82rem/1.2 var(--mono);max-width:42%;text-decoration:none}
+a.plan-marker:hover{background:#d5dcf3}
+.plan-camera,.plan-camera-side{background:#f4e3ab;color:#614922}
+.plan-camera{bottom:76px;left:33.5%;transform:translateX(-50%)}
+.plan-camera-side{bottom:127px;right:12%}
+.plan-chamber{top:47px;right:6%}
+.plan-threshold{bottom:38px;left:33.5%;transform:translateX(-50%);background:#d4ecbd;color:#294925;border-color:#50754c}
+.plan-facility{position:absolute;bottom:5px;left:4%;right:4%;padding:4px;border-top:1px solid #8691a6;font:700 .77rem var(--mono)}
+.survey-legend{margin:7px 3px 0;color:var(--muted)}
+.survey-actions{margin-bottom:0}
+.division-plot{display:grid;grid-template-columns:minmax(0,.9fr) 18px minmax(0,1.45fr) 18px minmax(0,.95fr);gap:4px;align-items:center;padding:12px 8px;border:1px solid #8089a4}
+.pit-room,.division-approach,.division-branches a{display:grid;gap:4px;border:1px solid #8189a4;background:#f6f6f0;padding:7px;font-size:.82rem;min-width:0;overflow-wrap:anywhere}
+.division-branches{display:grid;gap:6px}
+.division-connect{height:0;border-top:2px dashed #627493}
+.division-plot[data-stage=report] .division-approach{border:2px solid #965435;background:#f4dfc7}
+.division-plot[data-stage=report] .pit-room,.division-plot[data-stage=report] .division-branches{opacity:.68}
+.pit-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;position:relative}
+.pit-grid i{display:block;aspect-ratio:1;background:#3f4758;border:1px inset #afb3bf}
+.pit-walkway{position:absolute;left:0;right:0;top:39%;bottom:40%;background:#efd7a4;border:1px solid #8c753c}
+@media(max-width:620px){.survey-timeline{grid-template-columns:repeat(2,minmax(0,1fr))}.division-plot{grid-template-columns:1fr;min-height:0}.division-connect{height:10px;width:0;border-top:0;border-left:2px dashed #627493;margin:auto}.pit-grid{max-width:235px}.survey-plan-title{font-size:.65rem}}
