@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#283e6c">
   <meta name="description" content="A period-style research archive and evidence board for Kane Pixels’ Backrooms web series.">
   <title>A-Sync Research Terminal</title>
-  <link rel="stylesheet" href="style-v2.css">
+  <link rel="stylesheet" href="style-v3.css">
   <script src="archive.js" defer></script>
   <script src="evidence.js" defer></script>
-  <script src="terminal-v2.js" defer></script>
+  <script src="terminal-v3.js" defer></script>
 </head>
 <body class="login-pending">
   <main id="login" class="login-shell" aria-labelledby="login-title">
@@ -38,7 +38,14 @@
     <a class="brand" href="#overview" aria-label="A-Sync Research Institute home"><img class="brand-img" src="evidence/async-logo.webp" alt="Async Research Institute"></a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div class="terminal-name">Research Records <span>COMPLEX SURVEY &amp; INCIDENT FILES</span></div>
-    <button class="button sign-out" id="sign-out" type="button">Sign out</button>
+    <div class="mast-tools">
+      <label for="playback-mode">Playback</label>
+      <select id="playback-mode">
+        <option value="embedded">In archive</option>
+        <option value="youtube">On YouTube</option>
+      </select>
+      <button class="button sign-out" id="sign-out" type="button">Sign out</button>
+    </div>
   </header>
   <div class="shell">
     <aside class="sidebar">

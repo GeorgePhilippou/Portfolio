@@ -134,3 +134,6 @@ body.login-pending .login-shell{display:block;width:min(100%,475px);padding:0;ba
 #tape-player{width:min(860px,calc(100% - 20px))}
 .tape-iframe{display:block;width:100%;height:auto;min-height:200px;aspect-ratio:16/9;border:0;background:#09090d}
 .exhibit-links{align-items:center}
+.mast-tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px 9px}
+.mast-tools label{font:700 .8rem var(--mono);color:#252e57}
+@media(max-width:580px){.mast{flex-wrap:wrap}.mast-tools{width:100%;padding:3px 0;justify-content:flex-start}.mast-tools .sign-out{margin-left:auto}}

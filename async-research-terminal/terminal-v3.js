@@ -13,6 +13,11 @@ const nav = document.querySelector('#nav');
 const search = document.querySelector('#search');
 const lightbox = document.querySelector('#lightbox');
 const tapePlayer = document.querySelector('#tape-player');
+const playbackMode = document.querySelector('#playback-mode');
+const playbackKey = 'async-terminal-playback-v1';
+try {
+  if (localStorage.getItem(playbackKey) === 'youtube') playbackMode.value = 'youtube';
+} catch {}
 const operatorForm = document.querySelector('#operator-form');
 const operatorId = document.querySelector('#operator-id');
 const operatorCode = document.querySelector('#operator-code');
@@ -105,8 +110,18 @@ const videoURL = (record,seconds) => record.yt
   ? `https://www.youtube.com/watch?v=${record.yt}${seconds == null ? '' : `&t=${seconds}s`}`
   : officialPlaylist;
 const watch = (record,text,seconds) => sourceLink(videoURL(record,seconds),text ?? (record.yt ? 'Open original upload' : 'Open official playlist'));
-const playButton = (record,text='Play video',seconds=0) => record.yt
-  ? `<button class="button" type="button" data-play="${record.id}" data-start="${seconds}">${e(text)}</button>` : '';
+function playButton(record,text='Play video',seconds=0) {
+  if (!record.yt) return '';
+  if (playbackMode.value === 'youtube') {
+    return `<a class="button" href="${e(videoURL(record,seconds))}" target="_blank" rel="noopener">${e(text)} on YouTube</a>`;
+  }
+  return `<button class="button" type="button" data-play="${record.id}" data-start="${seconds}">${e(text)}</button>`;
+}
+
+playbackMode.addEventListener('change',() => {
+  try { localStorage.setItem(playbackKey,playbackMode.value); } catch {}
+  render();
+});
 
 function closeTape() {
   // Remove the player synchronously so its audio stops on every exit path.
