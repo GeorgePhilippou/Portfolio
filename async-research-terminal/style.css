@@ -131,3 +131,6 @@ body.login-pending .login-shell{display:block;width:min(100%,475px);padding:0;ba
 .login-feedback:empty{display:none}
 .login-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;padding:6px 9px;border-top:1px solid var(--line);font:.75rem var(--mono)}
 .sign-out{flex:none}
+#tape-player{width:min(860px,calc(100% - 20px))}
+.tape-iframe{display:block;width:100%;height:auto;min-height:200px;aspect-ratio:16/9;border:0;background:#09090d}
+.exhibit-links{align-items:center}

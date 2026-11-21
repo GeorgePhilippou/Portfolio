@@ -12,6 +12,7 @@ const inspector = document.querySelector('#inspector');
 const nav = document.querySelector('#nav');
 const search = document.querySelector('#search');
 const lightbox = document.querySelector('#lightbox');
+const tapePlayer = document.querySelector('#tape-player');
 const operatorForm = document.querySelector('#operator-form');
 const operatorId = document.querySelector('#operator-id');
 const operatorCode = document.querySelector('#operator-code');
@@ -86,6 +87,7 @@ operatorForm.addEventListener('submit',event => {
 });
 
 document.querySelector('#sign-out').addEventListener('click',() => {
+  closeTape();
   try { sessionStorage.removeItem(sessionKey); } catch {}
   for (const [field,preset] of operatorFields) updateField(field,-preset.length);
   setLoginState(false);
@@ -103,6 +105,31 @@ const videoURL = (record,seconds) => record.yt
   ? `https://www.youtube.com/watch?v=${record.yt}${seconds == null ? '' : `&t=${seconds}s`}`
   : officialPlaylist;
 const watch = (record,text,seconds) => sourceLink(videoURL(record,seconds),text ?? (record.yt ? 'Open original upload' : 'Open official playlist'));
+const playButton = (record,text='Play video',seconds=0) => record.yt
+  ? `<button class="button" type="button" data-play="${record.id}" data-start="${seconds}">${e(text)}</button>` : '';
+
+function closeTape() {
+  // Remove the player synchronously so its audio stops on every exit path.
+  tapePlayer.replaceChildren();
+  if (tapePlayer.open) tapePlayer.close();
+}
+
+function openTape(record,seconds) {
+  const start = Number.isSafeInteger(seconds) && seconds > 0 ? seconds : 0;
+  const stamp = `${Math.floor(start / 60)}:${String(start % 60).padStart(2,'0')}`;
+  const header = `<div class="panel-bar"><span id="tape-title">${e(record.title)}</span><button class="button" type="button" data-close-tape autofocus>Close</button></div>`;
+  const footer = `<div class="monitor-caption"><span>YouTube playback${start ? ` · Cue ${stamp}` : ''}</span>${watch(record,'Watch on YouTube',start)}</div>`;
+  if (location.protocol === 'file:') {
+    tapePlayer.innerHTML = header + `<div class="panel-body"><p>For in-app playback, open the <a href="https://georgephilippou.github.io/Portfolio/async-research-terminal/#record/${record.id}">hosted tape record</a>.</p></div>` + footer;
+  } else {
+    const params = new URLSearchParams({autoplay:'1',playsinline:'1',rel:'0'});
+    if (start) params.set('start',String(start));
+    const src = `https://www.youtube-nocookie.com/embed/${record.yt}?${params}`;
+    tapePlayer.innerHTML = header + `<iframe class="tape-iframe" title="${e(record.title)} — YouTube player" src="${e(src)}"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>` + footer;
+  }
+  tapePlayer.showModal();
+}
 const title = (code,heading,description='') => `<header class="page-head"><span class="eyebrow">${e(code)}</span><h1>${e(heading)}</h1>${description ? `<p class="muted">${e(description)}</p>` : ''}</header>`;
 const panel = (heading,body,extra='') => `<section class="panel ${extra}"><div class="panel-bar">${e(heading)}</div><div class="panel-body">${body}</div></section>`;
 
@@ -124,6 +151,7 @@ function evidenceImage(item, className = '', eager = false) {
 function evidenceCaption(item) {
   const video = byId[item.video];
   return `<span class="meta">${e(item.kind)} · Kane Parsons</span><p>${e(item.note)}</p><div class="exhibit-links">
+    ${playButton(video,item.seconds == null ? 'Play source video' : 'Play from this frame',item.seconds)}
     ${watch(video, `Source tape · ${video.title}`, item.seconds)}
     ${item.reference ? sourceLink(item.reference, 'Image reference') : ''}
   </div>`;
@@ -157,8 +185,8 @@ function overview() {
   const monitor = evidence[evidenceFor.ff1[0]];
   return title('PROJECT KV31 / RESEARCH RECORDS','Complex Research Archive','Review recovered footage, survey locations, and compare incident records.') +
     `<section class="panel monitor"><div class="panel-bar"><span>Frame viewer</span><span>The Backrooms (Found Footage)</span></div>
-      <div class="screen">${evidenceImage(monitor,'monitor-img',true)}${button('Open tape file','#record/ff1')}</div>
-      <div class="monitor-caption"><span>${e(monitor.kind)} · Kane Parsons</span>${watch(byId.ff1,'Open source tape',monitor.seconds)}</div>
+      <div class="screen">${evidenceImage(monitor,'monitor-img',true)}${playButton(byId.ff1,'Play tape')}</div>
+      <div class="monitor-caption"><span>${e(monitor.kind)} · Kane Parsons</span>${recordLink('ff1','Open tape file')}</div>
     </section>
     <div class="section-line"><h2>Visual files</h2></div>
     <div class="evidence-strip">${['division','beck','growth-figure'].map(id => {
@@ -231,10 +259,10 @@ function recordPage(record) {
   const sceneList = moments[record.id] ?? [];
   const recordEvents = events.filter(event => event.video === record.id);
   const pin = memory.pins.includes(record.id);
-  const actions = `<div class="toolbar"><button class="button" data-pin="${record.id}" aria-pressed="${pin}">${pin ? 'Pinned to case board' : 'Pin to case board'}</button>${isVideo ? watch(record) : ''}</div>`;
+  const actions = `<div class="toolbar">${isVideo ? playButton(record) : ''}<button class="button" data-pin="${record.id}" aria-pressed="${pin}">${pin ? 'Pinned to case board' : 'Pin to case board'}</button>${isVideo ? watch(record) : ''}</div>`;
   const details = panel('Record summary', `<p>${e(record.summary)}</p><div class="facts">${isVideo ? `<span>Upload · ${e(dateLabel(record.release))}</span><span>Runtime · ${e(record.duration)}</span>` : ''}<span>${e(record.type)}</span></div>`,'doc');
   const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p></article>`).join(''),'doc') : '';
-  const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : `<small>${watch(record,'Open this cue on YouTube',scene.seconds)}</small>`}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
+  const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : playButton(record,'Play from this cue',scene.seconds)}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
   const associations = isVideo ? sightings : record.refs.map(id => byId[id]);
   return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + details + evidenceGallery(record) + datePanel + scenePanel +
     (related.length ? panel('Connections',related.map(edge => connectionCard(edge)).join(''),'doc') : '') +
@@ -318,6 +346,7 @@ function render() {
 }
 
 window.addEventListener('hashchange', () => {
+  closeTape();
   resultsMessage = '';
   render();
   window.scrollTo(0,0);
@@ -335,6 +364,21 @@ document.addEventListener('keydown',event => {
 });
 lightbox.addEventListener('click', event => {
   if (event.target === lightbox || event.target.closest('[data-close-exhibit]')) lightbox.close();
+});
+tapePlayer.addEventListener('click', event => {
+  if (event.target === tapePlayer || event.target.closest('[data-close-tape]')) closeTape();
+});
+tapePlayer.addEventListener('cancel', event => {
+  event.preventDefault();
+  closeTape();
+});
+document.addEventListener('click', event => {
+  const play = event.target.closest('[data-play]');
+  if (!play || document.body.classList.contains('login-pending')) return;
+  const record = byId[play.dataset.play];
+  if (!record?.yt) return;
+  if (lightbox.open) lightbox.close();
+  openTape(record,Number(play.dataset.start));
 });
 main.addEventListener('click', event => {
   const control = event.target.closest('button');
