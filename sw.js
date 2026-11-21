@@ -53,6 +53,8 @@ async function networkFirst(event, req) {
   const cache = await caches.open(CACHE);
   // A navigation Request can't be re-issued with options, so fetch its URL instead.
   const nav = req.mode === 'navigate';
+  const path = new URL(req.url).pathname;
+  const portfolioHome = nav && (path === SCOPE || path === SCOPE + 'index.html');
   const network = (nav ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req, { cache: 'no-cache' }))
     .then(async (res) => {
       // Safari rejects redirected responses for navigations; hand back a clean copy.
@@ -65,7 +67,8 @@ async function networkFirst(event, req) {
     });
   const saved = cache.match(req)
     .then((hit) => hit || cache.match(req, { ignoreSearch: true })) // e.g. app.js?v=12 offline, saved as app.js
-    .then((hit) => hit || (req.mode === 'navigate' ? cache.match(SCOPE) : undefined));
+    // A subpage must use its own cached response or wait for the network.
+    .then((hit) => hit || (portfolioHome ? cache.match(SCOPE) : undefined));
   // Prefer the network; fall back to the saved copy if offline or very slow.
   const slow = new Promise((resolve) => setTimeout(resolve, SLOW_MS, 'slow'));
   try {
