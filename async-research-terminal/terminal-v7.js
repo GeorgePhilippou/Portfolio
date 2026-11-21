@@ -20,8 +20,12 @@ const lightbox = document.querySelector('#lightbox');
 const tapePlayer = document.querySelector('#tape-player');
 const playbackMode = document.querySelector('#playback-mode');
 const playbackKey = 'async-terminal-playback-v1';
+const recentKey = 'async-terminal-recent-record-v1';
+let recentRecord;
 try {
   if (localStorage.getItem(playbackKey) === 'youtube') playbackMode.value = 'youtube';
+  const id = localStorage.getItem(recentKey);
+  if (Object.hasOwn(byId,id)) recentRecord = byId[id];
 } catch {}
 const operatorForm = document.querySelector('#operator-form');
 const operatorId = document.querySelector('#operator-id');
@@ -215,16 +219,18 @@ function overview() {
       <div class="screen">${evidenceImage(monitor,'monitor-img',true)}${playButton(byId.ff1,'Play tape')}</div>
       <div class="monitor-caption"><span>${e(monitor.kind)} · Kane Parsons</span>${recordLink('ff1','Open tape file')}</div>
     </section>
+    <div class="archive-desk">
+      <a href="${recentRecord ? '#record/'+recentRecord.id : '#timeline'}"><span class="eyebrow">${recentRecord ? 'Last opened' : 'Release order'}</span><strong>${e(recentRecord?.title ?? 'Browse the tapes')}</strong></a>
+      <a href="#map"><span class="eyebrow">Survey</span><strong>Inspect the Complex map</strong></a>
+      <a href="#board"><span class="eyebrow">Case board</span><strong>${memory.pins.length} pinned · ${memory.notes.length} notes</strong></a>
+    </div>
     <div class="section-line"><h2>Visual files</h2></div>
     <div class="evidence-strip">${['division','beck','growth-figure'].map(id => {
       const item = evidence[evidenceFor[id]?.[0]];
       return `<a href="#record/${id}">${item ? evidenceImage(item) : ''}<strong>${e(byId[id].title)}</strong>${item ? `<span class="meta">${e(item.kind)}</span>` : ''}</a>`;
     }).join('')}</div>
     <div class="section-line"><h2>Investigation files</h2><a href="#videos">All ${videos.length} videos</a></div>
-    <div class="record-list">${row(byId.ff1,'Recovered footage · description leads to a second file','CIVILIAN')}${row(byId.first,'Threshold experiment · compare with faultline.mov','A-SYNC')}${row(byId.pit,'Field expedition · Room 14D and the house encounter','A-SYNC')}${row(byId.beck,'Personnel dossier · experiment records and internal calls','DOSSIER')}</div>
-    <div class="section-line"><h2>Open an investigation</h2></div><div class="overview-grid">
-      <a href="#timeline/story"><strong>◷</strong>Reconstruct events</a><a href="#map"><strong>▦</strong>Explore the Complex map</a><a href="#board"><strong>▧</strong>Build a case</a>
-    </div>`;
+    <div class="record-list">${row(byId.ff1,'Recovered footage · description leads to a second file','CIVILIAN')}${row(byId.first,'Threshold experiment · compare with faultline.mov','A-SYNC')}${row(byId.pit,'Field expedition · Room 14D and the house encounter','A-SYNC')}${row(byId.beck,'Personnel dossier · experiment records and internal calls','DOSSIER')}</div>`;
 }
 
 function videoArchive() {
@@ -330,63 +336,6 @@ function dossierIndex(group) {
     (diagrams ? '<div class="section-line"><h2>Survey routes</h2></div>' + diagrams : '');
 }
 
-function thresholdPlot(stage) {
-  const isPlan = stage.id === 'motion';
-  const notes = {
-    first:'The doorway is the verified landmark in this tape. The pale grid is the later March plan, shown for orientation.',
-    info:'The tape supplies an approach to the outpost and a drawing. Its position and footprint remain unplaced on this schematic.',
-    motion:'Redrawn from the camera plan at 0:54 and 1:04. Repeated cross-shaped pillars flank the highlighted lane as it runs toward the top of the page.',
-    present:'The May tape shows the developed outpost. The camera-plan grid stays visible as a March reference.'
-  };
-  return `<div class="survey-graphic threshold-plot route-bg" data-stage="${stage.id}">
-    <div class="survey-plan-title">${isPlan ? 'MARCH CAMERA PLAN · SCHEMATIC' : 'MARCH PLAN · ORIENTATION REFERENCE'}</div>
-    <div class="plan-grid" aria-hidden="true">${'<i></i>'.repeat(20)}</div>
-    <div class="plan-lane" aria-hidden="true"></div>
-    ${isPlan ? '<div class="plan-marker plan-camera">C1</div><div class="plan-marker plan-camera-side">C2</div>' : ''}
-    <a href="#record/yellow" class="plan-marker plan-chamber">Main Chamber</a>
-    <a href="#record/threshold" class="plan-marker plan-threshold">Threshold</a>
-    <div class="plan-facility">A-SYNC FACILITY SIDE</div>
-  </div><p class="survey-legend"><strong>Reading the plan.</strong> ${e(notes[stage.id])} Distances and compass bearings are unknown.</p>`;
-}
-
-function divisionPlot(stage) {
-  const bridged = stage.id === 'reunion' || stage.id === 'static';
-  return `<div class="division-plot route-bg" data-stage="${stage.id}">
-    <div class="division-approach"><span class="tag">Approach</span><strong>${stage.id === 'report' ? 'Partition closed' : bridged ? 'Approach reopened' : 'Survey enters'}</strong></div>
-    <div class="division-connect" aria-hidden="true"></div>
-    <div class="pit-room">
-      <h3>${recordLink('division','Room 14D')}</h3>
-      <div class="pit-grid" aria-hidden="true">${'<i></i>'.repeat(35)}${bridged ? '<span class="pit-walkway"></span>' : ''}</div>
-      <span class="meta">${bridged ? 'Walkway across pits' : 'Open pits'}</span>
-    </div>
-    <div class="division-connect" aria-hidden="true"></div>
-    <div class="division-branches">
-      ${stage.id === 'static' ? recordLink('static','Beyond far door') : recordLink('pit','Far door')}
-      ${stage.id === 'reunion' ? recordLink('reunion','Room 14C survey') : ''}
-      ${stage.id === 'pit' ? recordLink('street','Fall to the red-lit street') : ''}
-    </div>
-  </div><p class="survey-legend"><strong>Route schematic.</strong> The pit grid is a landmark. The dashed connectors show sequence with unknown spacing and bearings.${stage.id === 'reunion' ? ' Room 14C is a parallel survey, shown beside the walkway operation.' : ''}</p>`;
-}
-
-function surveyMap(areaId,stageId) {
-  const area = surveyAreas.find(item => item.id === areaId) ?? surveyAreas[0];
-  const stage = area.stages.find(item => item.id === stageId) ?? area.stages.find(item => item.id === area.start);
-  const video = byId[stage.video];
-  const diagram = area.id === 'threshold' ? thresholdPlot(stage) : area.id === 'division' ? divisionPlot(stage) :
-    `<div class="route route-bg">${stage.stops.map(([label,id]) => recordLink(id,label)).join('')}</div><p class="survey-legend"><strong>Recorded sequence.</strong> These stops have no assigned position on the Threshold plan.</p>`;
-  const firstFrame = evidence[stage.frames[0]];
-  return title('SURVEY / MAP EVIDENCE','Complex map','Compare the local plans and the routes shown on tape. Select a recording to see what it adds.') +
-    `<nav aria-label="Map area" class="survey-tabs">${surveyAreas.map(item => `<a class="button" href="#map/${item.id}/${item.start}" ${item.id === area.id ? 'aria-current="true"' : ''}>${e(item.title)}</a>`).join('')}</nav>
-    <nav aria-label="Map recordings" class="survey-timeline">${area.stages.map(item => `<a href="#map/${area.id}/${item.id}" ${item.id === stage.id ? 'aria-current="true"' : ''}><span class="meta">${e(item.when)}</span><strong>${e(item.label)}</strong><span>${e(byId[item.video].title)}</span></a>`).join('')}</nav>
-    ${panel(area.title,diagram,'doc survey-panel')}
-    ${panel('What this tape adds',`<h2>${e(video.title)}</h2><p>${e(stage.change)}</p><p class="muted">${e(stage.limit)}</p><div class="toolbar survey-actions">${playButton(video,`Play map cue · ${cueStamp(firstFrame.seconds)}`,firstFrame.seconds)}${recordLink(video.id,'Open tape briefing')}</div>`,'doc')}
-    ${exhibitGallery(stage.frames,'Original footage and diagrams')}
-    ${panel('Further comparison',`<p>Community reconstructions compare wall and pillar alignments across more recordings. Use the episode frames above to check any proposed match.</p><div class="source-list">
-      ${sourceLink('https://imgur.com/a/maps-of-kane-pixels-backrooms-KLYW2Xk','Community route diagrams · diomand20')}
-      ${sourceLink('https://www.reddit.com/r/KanePixelsBackrooms/comments/tysj9f/i_spent_the_last_3_weeks_mapping_out_the/','Mapping notes and disputed wall matches')}
-    </div>`,'doc')}`;
-}
-
 function connectionCard(edge, showSource=true) {
   return `<article class="connection"><span class="tag ${edge.status === 'Hypothesis' ? 'warning' : ''}">${e(edge.status)}</span><h3>${e(edge.kind)}</h3><p>${recordLink(edge.from)} <span aria-hidden="true">↔</span> ${recordLink(edge.to)}</p><p class="muted">${e(edge.note)}</p>
     ${showSource && edge.kind === 'Description link' ? `<small>${edge.status === 'Documented' ? watch(byId[edge.from],'Source video description') : sourceLink('https://kanepixelsbackrooms.fandom.com/wiki/Backrooms_-_Presentation','Episode reference')}</small>` : ''}</article>`;
@@ -438,7 +387,9 @@ function recordPage(record) {
   const sceneList = moments[record.id] ?? [];
   const recordEvents = events.filter(event => event.video === record.id);
   const pin = memory.pins.includes(record.id);
-  const actions = `<div class="toolbar">${isVideo ? playButton(record) : ''}<button class="button" data-pin="${record.id}" aria-pressed="${pin}">${pin ? 'Pinned to case board' : 'Pin to case board'}</button>${isVideo ? watch(record) : ''}</div>`;
+  const mapArea = surveyAreas.find(area => area.id === record.id || area.stages.some(stage=>stage.video === record.id));
+  const mapStage = mapArea?.stages.find(stage=>stage.video === record.id)?.id ?? mapArea?.start;
+  const actions = `<div class="toolbar">${isVideo ? playButton(record) : ''}${mapArea ? button('Locate in Complex map',`#map/${mapArea.id}/${mapStage}`) : ''}<button class="button" data-pin="${record.id}" aria-pressed="${pin}">${pin ? 'Pinned to case board' : 'Pin to case board'}</button>${isVideo ? watch(record) : ''}</div>`;
   const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p></article>`).join(''),'doc') : '';
   const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : playButton(record,'Play from this cue',scene.seconds)}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
   const associations = isVideo ? sightings : record.refs.map(id => byId[id]);
@@ -513,6 +464,7 @@ function save() {
 function render() {
   const [page,id,stage] = (location.hash.slice(1) || 'overview').split('/');
   const isFilmstrip = page === 'timeline' && id !== 'story';
+  const isSurvey = page === 'map';
   filmScroll = main.querySelector('.film-viewport')?.scrollLeft ?? filmScroll;
   const entry = page === 'record' ? byId[id] : null;
   const active = entry?.group ?? page;
@@ -521,15 +473,20 @@ function render() {
     links:connections, board, search:searchResults};
   nav.innerHTML = tabs.map(([key,symbol,label]) => `<a class="nav" href="#${key}" ${key === active ? 'aria-current="page"' : ''}><i aria-hidden="true">${symbol}</i>${label}</a>`).join('');
   main.innerHTML = entry ? recordPage(entry) : (Object.hasOwn(views,page) ? views[page]() : title('ARCHIVE','Record unavailable') + button('Return to overview','#overview'));
-  main.parentElement.classList.toggle('film-workspace', isFilmstrip);
-  inspector.hidden = isFilmstrip;
+  main.parentElement.classList.toggle('film-workspace', isFilmstrip || isSurvey);
+  inspector.hidden = isFilmstrip || isSurvey;
+  if (isSurvey) initSurvey(id,stage);
   if (isFilmstrip) {
     main.querySelector('.film-viewport').scrollLeft = filmScroll;
     if (stage) jumpToFilm(stage);
-  } else {
+  } else if (!isSurvey) {
     inspector.innerHTML = entry ? recordInspector(entry) : dashboardInspector();
   }
   if (!document.body.classList.contains('login-pending')) {
+    if (entry) {
+      recentRecord = entry;
+      try { localStorage.setItem(recentKey,entry.id); } catch {}
+    }
     document.title = `${main.querySelector('h1').textContent} | A-Sync Research Terminal`;
   }
 }
