@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#283e6c">
+  <meta name="description" content="A period-style research archive and evidence board for Kane Pixels’ Backrooms web series.">
+  <title>A-Sync Research Terminal</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="archive.js" defer></script>
+  <script src="evidence.js" defer></script>
+  <script src="terminal.js" defer></script>
+</head>
+<body>
+  <div class="window-caption"><span>Project KV31 — Records Workstation</span><span>INTERNAL USE ONLY</span></div>
+  <header class="mast">
+    <a class="brand" href="#overview" aria-label="A-Sync Research Institute home"><img class="brand-img" src="evidence/async-logo.webp" alt="Async Research Institute"></a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div class="terminal-name">Research Records <span>COMPLEX SURVEY &amp; INCIDENT FILES</span></div>
+    <div class="mast-status">LOCAL ARCHIVE</div>
+  </header>
+  <div class="shell">
+    <aside class="sidebar">
+      <p class="side-label">WORKSTATION</p>
+      <nav aria-label="Workstation" id="nav"></nav>
+      <div class="side-bottom">
+        <label for="search">FIND A RECORD</label>
+        <div class="searchbox"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search archive…" autocomplete="off"><kbd>/</kbd></div>
+        <a class="external" href="https://www.youtube.com/playlist?list=PLVAh-MgDVqvDUEq6qDXqORBioE4Yhol_z" target="_blank" rel="noopener">Official video playlist</a>
+      </div>
+    </aside>
+    <main id="main" tabindex="-1"></main>
+    <aside id="inspector" class="inspector" aria-label="Record inspector"></aside>
+  </div>
+  <dialog id="lightbox" aria-labelledby="exhibit-title"></dialog>
+  <footer><span>A-SYNC ARCHIVE <b>·</b> FAN PROJECT</span><span>Series by Kane Pixels <b>·</b> Contains spoilers</span></footer>
+</body>
+</html>
