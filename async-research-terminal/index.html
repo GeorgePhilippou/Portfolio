@@ -6,20 +6,26 @@
   <meta name="theme-color" content="#283e6c">
   <meta name="description" content="A period-style research archive and evidence board for Kane Pixels’ Backrooms web series.">
   <title>A-Sync Research Terminal</title>
-  <link rel="stylesheet" href="style-v7.css">
+  <link rel="stylesheet" href="style-v8.css">
   <script src="archive-v2.js" defer></script>
   <script src="evidence-v2.js" defer></script>
   <script src="briefings.js" defer></script>
   <script src="survey.js" defer></script>
-  <script src="cartography-v2.js" defer></script>
-  <script src="terminal-v7.js" defer></script>
+  <script src="cartography-v3.js" defer></script>
+  <script src="comparison.js" defer></script>
+  <script src="terminal-v8.js" defer></script>
 </head>
 <body class="login-pending">
   <main id="login" class="login-shell" aria-labelledby="login-title">
-    <div class="window-caption"><span>Project KV31 — Operator Access</span><span>INTERNAL USE ONLY</span></div>
-    <section class="login-panel">
+    <div class="window-caption"><span>ASYNC / KV31 — ACCESS CONTROL</span><span class="classification">CONFIDENTIAL · INTERNAL USE ONLY</span></div>
+    <div class="login-layout">
+      <figure class="login-monitor">
+        <img src="evidence/first-frame-103.webp" alt="Lit passage within the Threshold apparatus">
+        <figcaption><span>KV31 / THRESHOLD CONTROL</span><span>First Contact · 1:43</span></figcaption>
+      </figure>
+      <section class="login-panel">
       <div class="login-identity">
-        <img class="brand-img" src="evidence/async-logo.webp" alt="Async Research Institute">
+        <span class="program-seal" aria-hidden="true"><b>★★★</b><i></i><strong>KV31</strong></span>
         <div><span class="eyebrow">RESEARCH RECORDS / KV31</span><h1 id="login-title">Operator sign-in</h1></div>
       </div>
       <div class="login-state"><span aria-hidden="true">■</span> WORKSTATION LOCKED</div>
@@ -33,14 +39,19 @@
         <button class="button" type="submit">Sign in</button>
       </form>
       <noscript><p>This simulation requires JavaScript.</p></noscript>
-    </section>
-    <div class="login-footer">A-SYNC RESEARCH INSTITUTE <span>FAN PROJECT</span></div>
+      </section>
+    </div>
+    <div class="login-footer">A-SYNC RESEARCH INSTITUTE <span>FICTIONAL FAN ARCHIVE</span></div>
   </main>
-  <div class="window-caption"><span>Project KV31 — Records Workstation</span><span>INTERNAL USE ONLY</span></div>
+  <div class="window-caption"><span>ASYNC / KV31 — RESEARCH WORKSTATION</span><span class="classification">CONFIDENTIAL · INTERNAL USE ONLY</span></div>
   <header class="mast">
     <a class="brand" href="#overview" aria-label="A-Sync Research Institute home"><img class="brand-img" src="evidence/async-logo.webp" alt="Async Research Institute"></a>
     <div class="brand-divider" aria-hidden="true"></div>
-    <div class="terminal-name">Research Records <span>COMPLEX SURVEY &amp; INCIDENT FILES</span></div>
+    <div class="terminal-name">Project KV31 <span>COMPLEX RESEARCH ARCHIVE</span></div>
+    <a class="review-badge" href="#record/present" title="Open the Department of Energy briefing">
+      <span class="program-seal" aria-hidden="true"><b>★★★</b><i></i><strong>KV31</strong></span>
+      <span><b>FEDERAL REVIEW</b><small>DOE TAPE ARCHIVE</small></span>
+    </a>
     <div class="mast-tools">
       <label for="playback-mode">Playback</label>
       <select id="playback-mode">
@@ -50,6 +61,7 @@
       <button class="button sign-out" id="sign-out" type="button">Sign out</button>
     </div>
   </header>
+  <div class="operator-status"><span><i aria-hidden="true"></i> OPERATOR KV31-OPS</span><span id="workspace-context"></span></div>
   <div class="shell">
     <aside class="sidebar">
       <p class="side-label">WORKSTATION</p>
@@ -65,6 +77,6 @@
   </div>
   <dialog id="lightbox" aria-labelledby="exhibit-title"></dialog>
   <dialog id="tape-player" aria-labelledby="tape-title"></dialog>
-  <footer><span>A-SYNC ARCHIVE <b>·</b> FAN PROJECT</span><span>Series by Kane Pixels <b>·</b> Contains spoilers</span></footer>
+  <footer><span>A-SYNC ARCHIVE <b>·</b> FICTIONAL FAN PROJECT</span><span>Series by Kane Pixels <b>·</b> Contains spoilers</span></footer>
 </body>
 </html>

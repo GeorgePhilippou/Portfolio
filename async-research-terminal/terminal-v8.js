@@ -5,11 +5,12 @@ const mainTapes = videos.filter(record => videoCategory(record) === 'public');
 const companionEdges = edges.filter(edge =>
   ['Description link','Companion recording'].includes(edge.kind) && videoCategory(byId[edge.to]) === 'linked'
 );
-const tabs = [
-  ['overview','▣','Overview'],['videos','▤','Video archive'],['timeline','◷','Timeline'],
-  ['map','▦','Complex map'],['locations','⌗','Complex survey'],['people','◇','Personnel'],['entities','◉','Sightings'],
-  ['links','⋈','Connections'],['board','▧','Case board']
+const navigation = [
+  ['Workstation',[['overview','▣','Operator desk']]],
+  ['Records',[['videos','▤','Video archive'],['timeline','◷','Timeline'],['people','◇','Personnel'],['entities','◉','Sightings']]],
+  ['Analysis',[['map','▦','Complex map'],['locations','⌗','Locations'],['compare','◫','Compare evidence'],['links','⋈','Connections'],['board','▧','Case board']]]
 ];
+const tabs = navigation.flatMap(([,entries])=>entries);
 const labels = {videos:'Video',people:'Personnel',locations:'Location',entities:'Sighting'};
 const symbols = {videos:'▤',people:'◇',locations:'⌗',entities:'◉'};
 const main = document.querySelector('#main');
@@ -46,6 +47,7 @@ let edgeFilter = 'all';
 let mapRecord = 'ff1';
 let resultsMessage = '';
 let filmScroll = 0;
+let compareFocus = '';
 
 function setLoginState(isSignedIn) {
   document.body.classList.toggle('login-pending',!isSignedIn);
@@ -176,11 +178,12 @@ function evidenceImage(item, className = '', eager = false) {
   return `<img src="${e(src)}" alt="${e(item.alt)}" class="${className}" ${eager ? '' : 'loading="lazy"'} decoding="async">`;
 }
 
-function evidenceCaption(item) {
+function evidenceCaption(item,key) {
   const video = byId[item.video];
   return `<span class="meta">${e(item.kind)} · ${e(item.credit ?? 'Kane Parsons')}</span><p>${e(item.note)}</p><div class="exhibit-links">
     ${playButton(video,item.seconds == null ? 'Play source video' : 'Play from this frame',item.seconds)}
     ${watch(video, `Source tape · ${video.title}`, item.seconds)}
+    ${key ? `<a href="${comparisonURL(key)}">Compare frame</a>` : ''}
     ${item.reference ? sourceLink(item.reference, 'Image reference') : ''}
   </div>`;
 }
@@ -195,7 +198,7 @@ function exhibitGallery(items,heading='Visual evidence') {
     const item = evidence[key];
     return `<figure class="exhibit">
       <button class="exhibit-action" data-exhibit="${key}" aria-label="Enlarge ${e(item.title)}">${evidenceImage(item)}</button>
-      <figcaption><h3>${e(item.title)}</h3>${evidenceCaption(item)}</figcaption>
+      <figcaption><h3>${e(item.title)}</h3>${evidenceCaption(item,key)}</figcaption>
     </figure>`;
   }).join('')}</div>`, 'doc');
 }
@@ -213,16 +216,20 @@ function listing(items,empty='No matching records.') {
 }
 
 function overview() {
-  const monitor = evidence[evidenceFor.ff1[0]];
-  return title('PROJECT KV31 / RESEARCH RECORDS','Complex Research Archive','Review recovered footage, survey locations, and compare incident records.') +
-    `<section class="panel monitor"><div class="panel-bar"><span>Frame viewer</span><span>The Backrooms (Found Footage)</span></div>
-      <div class="screen">${evidenceImage(monitor,'monitor-img',true)}${playButton(byId.ff1,'Play tape')}</div>
-      <div class="monitor-caption"><span>${e(monitor.kind)} · Kane Parsons</span>${recordLink('ff1','Open tape file')}</div>
-    </section>
-    <div class="archive-desk">
-      <a href="${recentRecord ? '#record/'+recentRecord.id : '#timeline'}"><span class="eyebrow">${recentRecord ? 'Last opened' : 'Release order'}</span><strong>${e(recentRecord?.title ?? 'Browse the tapes')}</strong></a>
-      <a href="#map"><span class="eyebrow">Survey</span><strong>Inspect the Complex map</strong></a>
-      <a href="#board"><span class="eyebrow">Case board</span><strong>${memory.pins.length} pinned · ${memory.notes.length} notes</strong></a>
+  const monitor = evidence.model;
+  const desk = `<div class="operator-desk">
+    <a href="${recentRecord ? '#record/'+recentRecord.id : '#timeline'}"><span class="eyebrow">${recentRecord ? 'Last opened' : 'Release order'}</span><strong>${e(recentRecord?.title ?? 'Browse the tapes')}</strong></a>
+    <a href="#map"><span class="eyebrow">Field cartography</span><strong>Inspect the Complex map</strong></a>
+    <a href="#compare"><span class="eyebrow">Two source monitors</span><strong>Compare evidence</strong></a>
+    <a href="#board"><span class="eyebrow">Case board</span><strong>${memory.pins.length} pinned · ${memory.notes.length} notes</strong></a>
+  </div>`;
+  return title('KV31 / OPERATIONS','Operator desk','Open a record, trace a survey route, or review two source frames side by side.') +
+    `<div class="workstation-desk">
+      ${panel('Operations',desk,'desk-panel')}
+      <section class="panel monitor briefing-monitor"><div class="panel-bar"><span>DOE Tape Archive</span><span>3283</span></div>
+        <div class="screen">${evidenceImage(monitor,'monitor-img',true)}${playButton(byId.present,'Play briefing',monitor.seconds)}</div>
+        <div class="monitor-caption"><span>Presentation · ${cueStamp(monitor.seconds)}</span>${recordLink('present','Open tape file')}</div>
+      </section>
     </div>
     <div class="section-line"><h2>Visual files</h2></div>
     <div class="evidence-strip">${['division','beck','growth-figure'].map(id => {
@@ -465,21 +472,27 @@ function render() {
   const [page,id,stage] = (location.hash.slice(1) || 'overview').split('/');
   const isFilmstrip = page === 'timeline' && id !== 'story';
   const isSurvey = page === 'map';
+  const isCompare = page === 'compare';
+  const fullWidth = isFilmstrip || isSurvey || isCompare;
   filmScroll = main.querySelector('.film-viewport')?.scrollLeft ?? filmScroll;
   const entry = page === 'record' ? byId[id] : null;
   const active = entry?.group ?? page;
-  const views = {overview, videos:videoArchive, timeline:()=>timeline(id), map:()=>surveyMap(id,stage), people:()=>dossierIndex('people'),
+  const views = {overview, videos:videoArchive, timeline:()=>timeline(id), map:()=>surveyMap(id,stage), compare:()=>comparisonView(id,stage), people:()=>dossierIndex('people'),
     locations:()=>dossierIndex('locations'), entities:()=>dossierIndex('entities'),
     links:connections, board, search:searchResults};
-  nav.innerHTML = tabs.map(([key,symbol,label]) => `<a class="nav" href="#${key}" ${key === active ? 'aria-current="page"' : ''}><i aria-hidden="true">${symbol}</i>${label}</a>`).join('');
+  nav.innerHTML = navigation.map(([group,entries])=>`<div class="nav-section"><span class="nav-heading">${group}</span>${entries.map(([key,symbol,label]) =>
+    `<a class="nav" href="#${key}" ${key === active ? 'aria-current="page"' : ''}><i aria-hidden="true">${symbol}</i>${label}</a>`
+  ).join('')}</div>`).join('');
   main.innerHTML = entry ? recordPage(entry) : (Object.hasOwn(views,page) ? views[page]() : title('ARCHIVE','Record unavailable') + button('Return to overview','#overview'));
-  main.parentElement.classList.toggle('film-workspace', isFilmstrip || isSurvey);
-  inspector.hidden = isFilmstrip || isSurvey;
+  document.querySelector('#workspace-context').textContent = entry ? `${labels[entry.group]} / ${entry.title}` :
+    tabs.find(([key])=>key===page)?.[2] ?? (page === 'search' ? 'Search archive' : 'Records');
+  main.parentElement.classList.toggle('film-workspace', fullWidth);
+  inspector.hidden = fullWidth;
   if (isSurvey) initSurvey(id,stage);
   if (isFilmstrip) {
     main.querySelector('.film-viewport').scrollLeft = filmScroll;
     if (stage) jumpToFilm(stage);
-  } else if (!isSurvey) {
+  } else if (!fullWidth) {
     inspector.innerHTML = entry ? recordInspector(entry) : dashboardInspector();
   }
   if (!document.body.classList.contains('login-pending')) {
@@ -493,10 +506,14 @@ function render() {
 
 window.addEventListener('hashchange', () => {
   closeTape();
+  if (lightbox.open) lightbox.close();
   resultsMessage = '';
   render();
   window.scrollTo(0,0);
-  if (location.hash !== '#search') main.focus({preventScroll:true});
+  if (compareFocus && location.hash.startsWith('#compare/')) {
+    main.querySelector('#compare-'+compareFocus)?.focus({preventScroll:true});
+  } else if (location.hash !== '#search') main.focus({preventScroll:true});
+  compareFocus = '';
 });
 search.addEventListener('input', () => {
   if (location.hash === '#search') render();
@@ -529,7 +546,13 @@ document.addEventListener('click', event => {
 main.addEventListener('click', event => {
   const control = event.target.closest('button');
   if (!control) return;
-  const {filmScroll:scrollDirection,videoFilter:filter,pin,deleteNote,exhibit} = control.dataset;
+  const {filmScroll:scrollDirection,videoFilter:filter,pin,deleteNote,exhibit,comparePin} = control.dataset;
+  if (comparePin) {
+    memory.pins = [...new Set([...memory.pins,...comparePin.split('/').filter(id=>Object.hasOwn(byId,id))])];
+    save();
+    main.querySelector('#compare-state').textContent = storageAvailable ? 'Source records pinned.' : 'Pinned for this session.';
+    return;
+  }
   if (scrollDirection) {
     const viewport = main.querySelector('.film-viewport');
     viewport.scrollBy({left:Number(scrollDirection)*viewport.clientWidth*.8});
@@ -538,7 +561,7 @@ main.addEventListener('click', event => {
   if (exhibit) {
     const item = evidence[exhibit];
     lightbox.innerHTML = `<div class="panel-bar"><span id="exhibit-title">${e(item.title)}</span><button class="button" data-close-exhibit autofocus>Close</button></div>
-      ${evidenceImage(item,'',true)}<div class="panel-body">${evidenceCaption(item)}</div>`;
+      ${evidenceImage(item,'',true)}<div class="panel-body">${evidenceCaption(item,exhibit)}</div>`;
     lightbox.showModal();
     return;
   }
@@ -561,6 +584,12 @@ main.addEventListener('click', event => {
 });
 main.addEventListener('change', event => {
   const {id,value} = event.target;
+  const {compareSide,peer} = event.target.dataset;
+  if (compareSide) {
+    compareFocus = compareSide;
+    location.hash = compareSide === 'A' ? comparisonURL(value,peer) : comparisonURL(peer,value);
+    return;
+  }
   if (id === 'film-jump') {
     jumpToFilm(value);
     return;

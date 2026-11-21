@@ -186,7 +186,7 @@ function initSurvey(areaId,stageId) {
     for (const control of document.querySelectorAll('[data-survey-source]')) {
       control.setAttribute('aria-pressed',String(control.dataset.surveySource === key));
     }
-    document.querySelector('#survey-source').innerHTML = `<button class="exhibit-action survey-source-large" type="button" data-exhibit="${key}" aria-label="Enlarge ${e(item.title)}">${evidenceImage(item,'',true)}</button><h3>${e(item.title)}</h3>${evidenceCaption(item)}`;
+    document.querySelector('#survey-source').innerHTML = `<button class="exhibit-action survey-source-large" type="button" data-exhibit="${key}" aria-label="Enlarge ${e(item.title)}">${evidenceImage(item,'',true)}</button><h3>${e(item.title)}</h3>${evidenceCaption(item,key)}`;
   }
 
   function setZoom(next) {
