@@ -1,5 +1,10 @@
 const records = [...videos, ...dossiers];
 const byId = Object.fromEntries(records.map(record => [record.id,record]));
+const videoCategory = record => ({'Linked file':'linked',Supplemental:'supplemental'})[record.type] ?? 'public';
+const mainTapes = videos.filter(record => videoCategory(record) === 'public');
+const companionEdges = edges.filter(edge =>
+  ['Description link','Companion recording'].includes(edge.kind) && videoCategory(byId[edge.to]) === 'linked'
+);
 const tabs = [
   ['overview','▣','Overview'],['videos','▤','Video archive'],['timeline','◷','Timeline'],
   ['map','▦','Complex map'],['locations','⌗','Complex survey'],['people','◇','Personnel'],['entities','◉','Sightings'],
@@ -32,11 +37,11 @@ try {
   if (Array.isArray(saved?.pins) && Array.isArray(saved?.notes)) memory = saved;
 } catch {}
 let storageAvailable = true;
-let timelineMode = 'story';
 let videoFilter = 'all';
 let edgeFilter = 'all';
 let mapRecord = 'ff1';
 let resultsMessage = '';
+let filmScroll = 0;
 
 function setLoginState(isSignedIn) {
   document.body.classList.toggle('login-pending',!isSignedIn);
@@ -218,27 +223,97 @@ function overview() {
     <div class="section-line"><h2>Investigation files</h2><a href="#videos">All ${videos.length} videos</a></div>
     <div class="record-list">${row(byId.ff1,'Recovered footage · description leads to a second file','CIVILIAN')}${row(byId.first,'Threshold experiment · compare with faultline.mov','A-SYNC')}${row(byId.pit,'Field expedition · Room 14D and the house encounter','A-SYNC')}${row(byId.beck,'Personnel dossier · experiment records and internal calls','DOSSIER')}</div>
     <div class="section-line"><h2>Open an investigation</h2></div><div class="overview-grid">
-      <a href="#timeline"><strong>◷</strong>Reconstruct events</a><a href="#map"><strong>▦</strong>Explore the Complex map</a><a href="#board"><strong>▧</strong>Build a case</a>
+      <a href="#timeline/story"><strong>◷</strong>Reconstruct events</a><a href="#map"><strong>▦</strong>Explore the Complex map</a><a href="#board"><strong>▧</strong>Build a case</a>
     </div>`;
 }
 
 function videoArchive() {
   const filters = [['all','All videos'],['public','Main uploads'],['linked','Linked files'],['supplemental','Supplemental']];
-  const filterTypes = {'Linked file':'linked',Supplemental:'supplemental'};
-  const chosen = videos.filter(record => videoFilter === 'all' || videoFilter === (filterTypes[record.type] ?? 'public'));
+  const chosen = videos.filter(record => videoFilter === 'all' || videoFilter === videoCategory(record));
   return title('ARCHIVE / MEDIA','Video archive','Open a tape to inspect its story dates, scene notes, references and connections.') +
     `<div class="toolbar" aria-label="Filter videos">${filters.map(([id,name]) => `<button class="button" data-video-filter="${id}" aria-pressed="${id === videoFilter}">${name}</button>`).join('')}<span class="meta muted">${chosen.length} records</span></div>` +
     listing(chosen);
 }
 
-function timeline() {
-  const isStory = timelineMode === 'story';
+function companionCard(record,label) {
+  return `<a href="#record/${record.id}" class="film-companion" data-film="${record.id}">
+    ${evidenceImage(evidence['upload-'+record.id])}
+    <span><strong>${e(record.title)}</strong><small>${e(label)} · <time datetime="${record.release}">${e(dateLabel(record.release))}</time></small></span>
+  </a>`;
+}
+
+function releaseFilmstrip() {
+  const attached = new Set(companionEdges.map(edge => edge.to));
+  const columns = videos.filter(record => !attached.has(record.id)).map(record => {
+    if (videoCategory(record) !== 'public') {
+      return `<li class="film-column film-gap"><div class="film-upper">${companionCard(record,record.type)}</div><div class="film-axis"></div></li>`;
+    }
+    const companions = companionEdges.filter(edge => edge.from === record.id).map(edge =>
+      companionCard(byId[edge.to],edge.kind === 'Description link' ? 'Description link' : 'Companion recording')
+    ).join('');
+    return `<li class="film-column">
+      <div class="film-upper">${companions}</div><div class="film-axis"></div>
+      <article class="film-card" data-film="${record.id}">
+        <a href="#record/${record.id}" class="film-record">${evidenceImage(evidence['upload-'+record.id])}
+          <time datetime="${record.release}">${e(dateLabel(record.release))}</time><strong>${e(record.title)}</strong>
+        </a>
+        <div class="film-actions">${playButton(record,'Play')}${recordLink(record.id,'Briefing')}</div>
+      </article>
+    </li>`;
+  }).join('');
+  return `<section class="panel film-panel" aria-label="Release filmstrip">
+    <div class="panel-bar"><span>Release filmstrip</span><span>${mainTapes.length} main episodes</span></div>
+    <div class="film-tools">
+      <button class="button" type="button" data-film-scroll="-1">Scroll left</button>
+      <button class="button" type="button" data-film-scroll="1">Scroll right</button>
+      <label for="film-jump">Jump to episode</label>
+      <select id="film-jump"><option value="">Choose an episode</option>${mainTapes.map(record =>
+        `<option value="${record.id}">${e(record.title)}</option>`).join('')}</select>
+    </div>
+    <div class="film-viewport" tabindex="0" aria-label="Scrollable release filmstrip">
+      <ol class="film-track">${columns}</ol>
+    </div>
+    <div class="monitor-caption film-key"><span><b>Above</b> · Companion files and supplemental material</span><span><b>Below</b> · Main episodes, in upload order</span></div>
+  </section>`;
+}
+
+function storyChronology() {
   const eventRow = event => `<a class="record timeline-row" href="#record/${event.video}"><time>${e(dateLabel(event.date))}</time><span class="record-main"><strong>${e(event.title)}</strong><small>${e(byId[event.video].title)} · ${e(event.note)}</small></span><span class="tag">${e(event.basis)}</span></a>`;
-  const dated = events.filter(event => event.date).sort((a,b) => a.date.localeCompare(b.date));
+  const orderDate = event => event.video === 'recording' ? '1990-05-08' : event.date;
+  const dated = events.filter(event => event.date && event.basis !== 'Relative date').sort((a,b) => orderDate(a).localeCompare(orderDate(b)));
+  const relative = events.filter(event => event.basis === 'Relative date');
   const undated = events.filter(event => !event.date);
-  return title('ARCHIVE / CHRONOLOGY','Timeline',isStory ? 'Reconstruct the order of events from dates in the footage, upload descriptions, and secondary references.' : 'Browse the archive by YouTube upload date.') +
-    `<div class="toolbar" aria-label="Timeline order"><button class="button" data-timeline="story" aria-pressed="${isStory}">In-story chronology</button><button class="button" data-timeline="release" aria-pressed="${!isStory}">YouTube release order</button></div>` +
-    (isStory ? `<div class="record-list">${dated.map(eventRow).join('')}</div><div class="section-line"><h2>Unplaced events</h2></div><div class="record-list">${undated.map(eventRow).join('')}</div>` : listing(videos));
+  return `<div class="record-list">${dated.map(eventRow).join('')}</div>
+    <div class="section-line"><h2>Known sequence, uncertain date</h2></div><div class="record-list">${relative.map(eventRow).join('')}</div>
+    <div class="section-line"><h2>Unplaced events</h2></div><div class="record-list">${undated.map(eventRow).join('')}</div>`;
+}
+
+function timeline(mode) {
+  const isStory = mode === 'story';
+  return title('ARCHIVE / CHRONOLOGY','Timeline',isStory ? 'Reconstruct the order of events from dates in the footage, upload descriptions, and secondary references.' : 'Follow the main series in upload order. Linked files sit above their related episode, while standalone supplements sit between releases.') +
+    `<nav class="toolbar timeline-switch" aria-label="Timeline order"><a class="button" href="#timeline/release" ${isStory ? '' : 'aria-current="page"'}>YouTube release order</a><a class="button" href="#timeline/story" ${isStory ? 'aria-current="page"' : ''}>In-story chronology</a></nav>` +
+    (isStory ? storyChronology() : releaseFilmstrip());
+}
+
+function jumpToFilm(id) {
+  if (!videos.some(record => record.id === id)) return;
+  const viewport = main.querySelector('.film-viewport');
+  const item = viewport?.querySelector(`[data-film="${id}"]`);
+  if (!item) return;
+  const bounds = viewport.getBoundingClientRect();
+  viewport.scrollLeft += item.getBoundingClientRect().left - bounds.left - 14;
+  main.querySelector('#film-jump').value = mainTapes.some(record => record.id === id) ? id : '';
+}
+
+function tapeNavigation(record) {
+  const index = mainTapes.indexOf(record);
+  const previous = index > 0 ? mainTapes[index - 1] : null;
+  const next = index >= 0 ? mainTapes[index + 1] : null;
+  return `<nav class="tape-navigation" aria-label="Release navigation">
+    ${previous ? recordLink(previous.id,`Previous · ${previous.title}`) : ''}
+    <a href="#timeline/release/${record.id}">View in release filmstrip</a>
+    ${next ? recordLink(next.id,`Next · ${next.title}`) : ''}
+  </nav>`;
 }
 
 function dossierIndex(group) {
@@ -367,7 +442,7 @@ function recordPage(record) {
   const datePanel = recordEvents.length ? panel('In-story events',recordEvents.map(event => `<article class="scene"><span class="tag">${e(dateLabel(event.date))} · ${e(event.basis)}</span><h3>${e(event.title)}</h3><p>${e(event.note)}</p></article>`).join(''),'doc') : '';
   const scenePanel = sceneList.length ? panel('Scene notes',sceneList.map(scene => `<article class="scene"><span class="tag">${e(scene.label)}</span><h3>${e(scene.title)}</h3><p>${e(scene.note)}</p>${scene.seconds == null ? '' : playButton(record,'Play from this cue',scene.seconds)}${scene.reference ? `<small> · ${sourceLink(scene.reference,'Cue reference')}</small>` : ''}</article>`).join(''),'doc') : '';
   const associations = isVideo ? sightings : record.refs.map(id => byId[id]);
-  return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + briefingPanel(record) + evidenceGallery(record) + datePanel + scenePanel +
+  return title(`${labels[record.group]} / ${record.id.toUpperCase()}`,record.title) + actions + (isVideo ? tapeNavigation(record) : '') + briefingPanel(record) + evidenceGallery(record) + datePanel + scenePanel +
     (related.length ? panel('Connections',related.map(edge => connectionCard(edge)).join(''),'doc') : '') +
     (associations.length ? `<div class="section-line"><h2>${isVideo ? 'Referenced dossiers' : 'Referenced videos'}</h2></div>${listing(associations)}` : '');
 }
@@ -424,7 +499,7 @@ function recordInspector(record) {
 
 function dashboardInspector() {
   const sampleEvents = ['1972-08-02','1989-10-17','1990-05-08','1996-09-23'].map(date => events.find(event => event.date === date));
-  return panel('Incident log',sampleEvents.map(event => `<div class="incident"><time>${e(dateLabel(event.date))}</time>${recordLink(event.video,event.title)}</div>`).join('') + button('Open timeline','#timeline')) +
+  return panel('Incident log',sampleEvents.map(event => `<div class="incident"><time>${e(dateLabel(event.date))}</time>${recordLink(event.video,event.title)}</div>`).join('') + button('Open chronology','#timeline/story')) +
     panel('Active lead',`<p class="mini-title">The Ivan Beck file</p><p class="muted">Follow Beck from the project’s public rationale through the recovered-body examination and the Tench incident.</p>${button('Inspect dossier','#record/beck')}`) +
     panel('Evidence key','<p><span class="tag">DOCUMENTED</span><br>Directly attested in the cited source.</p><p><span class="tag warning">HYPOTHESIS</span><br>A possible relationship to investigate.</p>');
 }
@@ -437,14 +512,23 @@ function save() {
 
 function render() {
   const [page,id,stage] = (location.hash.slice(1) || 'overview').split('/');
+  const isFilmstrip = page === 'timeline' && id !== 'story';
+  filmScroll = main.querySelector('.film-viewport')?.scrollLeft ?? filmScroll;
   const entry = page === 'record' ? byId[id] : null;
   const active = entry?.group ?? page;
-  const views = {overview, videos:videoArchive, timeline, map:()=>surveyMap(id,stage), people:()=>dossierIndex('people'),
+  const views = {overview, videos:videoArchive, timeline:()=>timeline(id), map:()=>surveyMap(id,stage), people:()=>dossierIndex('people'),
     locations:()=>dossierIndex('locations'), entities:()=>dossierIndex('entities'),
     links:connections, board, search:searchResults};
   nav.innerHTML = tabs.map(([key,symbol,label]) => `<a class="nav" href="#${key}" ${key === active ? 'aria-current="page"' : ''}><i aria-hidden="true">${symbol}</i>${label}</a>`).join('');
   main.innerHTML = entry ? recordPage(entry) : (Object.hasOwn(views,page) ? views[page]() : title('ARCHIVE','Record unavailable') + button('Return to overview','#overview'));
-  inspector.innerHTML = entry ? recordInspector(entry) : dashboardInspector();
+  main.parentElement.classList.toggle('film-workspace', isFilmstrip);
+  inspector.hidden = isFilmstrip;
+  if (isFilmstrip) {
+    main.querySelector('.film-viewport').scrollLeft = filmScroll;
+    if (stage) jumpToFilm(stage);
+  } else {
+    inspector.innerHTML = entry ? recordInspector(entry) : dashboardInspector();
+  }
   if (!document.body.classList.contains('login-pending')) {
     document.title = `${main.querySelector('h1').textContent} | A-Sync Research Terminal`;
   }
@@ -488,7 +572,12 @@ document.addEventListener('click', event => {
 main.addEventListener('click', event => {
   const control = event.target.closest('button');
   if (!control) return;
-  const {timeline,videoFilter:filter,pin,deleteNote,exhibit} = control.dataset;
+  const {filmScroll:scrollDirection,videoFilter:filter,pin,deleteNote,exhibit} = control.dataset;
+  if (scrollDirection) {
+    const viewport = main.querySelector('.film-viewport');
+    viewport.scrollBy({left:Number(scrollDirection)*viewport.clientWidth*.8});
+    return;
+  }
   if (exhibit) {
     const item = evidence[exhibit];
     lightbox.innerHTML = `<div class="panel-bar"><span id="exhibit-title">${e(item.title)}</span><button class="button" data-close-exhibit autofocus>Close</button></div>
@@ -497,10 +586,7 @@ main.addEventListener('click', event => {
     return;
   }
   let restore;
-  if (timeline) {
-    timelineMode = timeline;
-    restore = `[data-timeline="${timeline}"]`;
-  } else if (filter) {
+  if (filter) {
     videoFilter = filter;
     restore = `[data-video-filter="${filter}"]`;
   } else if (pin && byId[pin]) {
@@ -518,6 +604,10 @@ main.addEventListener('click', event => {
 });
 main.addEventListener('change', event => {
   const {id,value} = event.target;
+  if (id === 'film-jump') {
+    jumpToFilm(value);
+    return;
+  }
   if (id === 'edge-type') edgeFilter = value;
   else if (id === 'map-record') mapRecord = value;
   else return;
