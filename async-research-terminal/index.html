@@ -11,13 +11,34 @@
   <script src="evidence.js" defer></script>
   <script src="terminal.js" defer></script>
 </head>
-<body>
+<body class="login-pending">
+  <main id="login" class="login-shell" aria-labelledby="login-title">
+    <div class="window-caption"><span>Project KV31 — Operator Access</span><span>INTERNAL USE ONLY</span></div>
+    <section class="login-panel">
+      <div class="login-identity">
+        <img class="brand-img" src="evidence/async-logo.webp" alt="Async Research Institute">
+        <div><span class="eyebrow">RESEARCH RECORDS / KV31</span><h1 id="login-title">Operator sign-in</h1></div>
+      </div>
+      <div class="login-state"><span aria-hidden="true">■</span> WORKSTATION LOCKED</div>
+      <form id="operator-form" autocomplete="off">
+        <label for="operator-id">Operator ID</label>
+        <input id="operator-id" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="login-hint">
+        <label for="operator-code">Access code</label>
+        <input id="operator-code" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="login-hint">
+        <p id="login-hint">Simulation. Type any keys in each field. Use no real credentials.</p>
+        <p class="login-feedback" id="login-feedback" role="status"></p>
+        <button class="button" type="submit">Sign in</button>
+      </form>
+      <noscript><p>This simulation requires JavaScript.</p></noscript>
+    </section>
+    <div class="login-footer">A-SYNC RESEARCH INSTITUTE <span>FAN PROJECT</span></div>
+  </main>
   <div class="window-caption"><span>Project KV31 — Records Workstation</span><span>INTERNAL USE ONLY</span></div>
   <header class="mast">
     <a class="brand" href="#overview" aria-label="A-Sync Research Institute home"><img class="brand-img" src="evidence/async-logo.webp" alt="Async Research Institute"></a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div class="terminal-name">Research Records <span>COMPLEX SURVEY &amp; INCIDENT FILES</span></div>
-    <div class="mast-status">LOCAL ARCHIVE</div>
+    <button class="button sign-out" id="sign-out" type="button">Sign out</button>
   </header>
   <div class="shell">
     <aside class="sidebar">

@@ -12,6 +12,13 @@ const inspector = document.querySelector('#inspector');
 const nav = document.querySelector('#nav');
 const search = document.querySelector('#search');
 const lightbox = document.querySelector('#lightbox');
+const operatorForm = document.querySelector('#operator-form');
+const operatorId = document.querySelector('#operator-id');
+const operatorCode = document.querySelector('#operator-code');
+const loginFeedback = document.querySelector('#login-feedback');
+const sessionKey = 'async-terminal-operator-v1';
+const operatorFields = new Map([[operatorId,'KV31-OPS'],[operatorCode,'••••••••']]);
+const progress = new Map([[operatorId,0],[operatorCode,0]]);
 const storageKey = 'async-terminal-case-board-v1';
 let memory = {pins:[],notes:[]};
 try {
@@ -24,6 +31,66 @@ let videoFilter = 'all';
 let edgeFilter = 'all';
 let mapRecord = 'ff1';
 let resultsMessage = '';
+
+function setLoginState(isSignedIn) {
+  document.body.classList.toggle('login-pending',!isSignedIn);
+  if (!isSignedIn) document.title = 'Operator sign-in | A-Sync Research Terminal';
+}
+
+function updateField(field, change) {
+  const preset = operatorFields.get(field);
+  const count = Math.max(0,Math.min(preset.length,progress.get(field)+change));
+  progress.set(field,count);
+  field.value = preset.slice(0,count);
+  loginFeedback.textContent = '';
+}
+
+for (const field of operatorFields.keys()) {
+  field.addEventListener('keydown',event => {
+    if (event.metaKey || event.ctrlKey || event.altKey || event.isComposing) return;
+    if (event.key.length === 1 || ['Backspace','Delete'].includes(event.key)) {
+      event.preventDefault();
+      updateField(field,event.key.length === 1 ? 1 : -1);
+    } else if (event.key === 'Enter' && field === operatorId) {
+      event.preventDefault();
+      operatorCode.focus();
+    }
+  });
+  field.addEventListener('beforeinput',event => {
+    if (!event.cancelable) return;
+    event.preventDefault();
+    updateField(field,event.inputType.startsWith('delete') ? -1 : 1);
+  });
+  // Some mobile input methods cannot cancel beforeinput. Replace their DOM value without reading it.
+  field.addEventListener('input',event => updateField(field,event.inputType?.startsWith('delete') ? -1 : 1));
+  for (const type of ['paste','drop']) {
+    field.addEventListener(type,event => {
+      event.preventDefault();
+      updateField(field,1);
+    });
+  }
+}
+
+operatorForm.addEventListener('submit',event => {
+  event.preventDefault();
+  const missing = [...operatorFields.keys()].find(field => !progress.get(field));
+  if (missing) {
+    loginFeedback.textContent = 'Type a key in both fields to continue.';
+    missing.focus();
+    return;
+  }
+  try { sessionStorage.setItem(sessionKey,'open'); } catch {}
+  setLoginState(true);
+  render();
+  main.focus();
+});
+
+document.querySelector('#sign-out').addEventListener('click',() => {
+  try { sessionStorage.removeItem(sessionKey); } catch {}
+  for (const [field,preset] of operatorFields) updateField(field,-preset.length);
+  setLoginState(false);
+  operatorId.focus();
+});
 
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -245,7 +312,9 @@ function render() {
   nav.innerHTML = tabs.map(([key,symbol,label]) => `<a class="nav" href="#${key}" ${key === active ? 'aria-current="page"' : ''}><i aria-hidden="true">${symbol}</i>${label}</a>`).join('');
   main.innerHTML = entry ? recordPage(entry) : (Object.hasOwn(views,page) ? views[page]() : title('ARCHIVE','Record unavailable') + button('Return to overview','#overview'));
   inspector.innerHTML = entry ? recordInspector(entry) : dashboardInspector();
-  document.title = `${main.querySelector('h1').textContent} | A-Sync Research Terminal`;
+  if (!document.body.classList.contains('login-pending')) {
+    document.title = `${main.querySelector('h1').textContent} | A-Sync Research Terminal`;
+  }
 }
 
 window.addEventListener('hashchange', () => {
@@ -326,4 +395,7 @@ main.addEventListener('submit', event => {
   main.querySelector('#note-text').focus({preventScroll:true});
 });
 
+let signedIn = false;
+try { signedIn = sessionStorage.getItem(sessionKey) === 'open'; } catch {}
+setLoginState(signedIn);
 render();
