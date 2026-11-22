@@ -12,7 +12,11 @@ const evidence = Object.fromEntries(videos.map(video => [`upload-${video.id}`, {
 const evidenceFor = Object.fromEntries(videos.map(video => [video.id, [`upload-${video.id}`]]));
 
 const storyboardExhibits = [
-  ['missing-notice-frame','missing',28,'Missing-person notice','A missing-person poster in the opening montage.'],
+  ['notice-bolton','missing',2,'Utility-pole notice','A missing-person notice is attached to a utility pole.',['missing-bolton']],
+  ['notice-watson','missing',10,'Margaret Watson notice','The notice bearing Watson’s name lies outside.',['missing-watson']],
+  ['notice-reward','missing',18,'Unidentified reward notice','A notice shows an unidentified person above a reward line.',['missing-unidentified-notice']],
+  ['notice-scott','missing',34,'Janice Scott notice','A notice in a shop window is identified as Scott’s in the episode reference.',['missing-scott']],
+  ['missing-notice-frame','missing',28,'Missing-person notice','A missing-person poster on glass in the opening montage.',['missing-white']],
   ['recovered-remains','missing',136,'Recovery sequence','The survey team’s view near the wall during the discovery sequence.'],
   ['loma-prieta-news','fault',20,'Loma Prieta news coverage','An aerial news shot from the linked archival broadcast.'],
   ['autopsy-frame','autopsy',30,'Autopsy recording','The examination tape shows the body on a table.'],

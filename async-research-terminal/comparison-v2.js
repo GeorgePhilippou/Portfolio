@@ -19,12 +19,12 @@ function comparisonView(leftKey,rightKey) {
   const activePair = comparisonPairs.find(([,a,b])=>(a===left&&b===right)||(a===right&&b===left));
   function monitor(key,side) {
     const item = evidence[key];
-    const options = videos.map(video => {
+    const options = [...videos,featureTrailer].map(video => {
       const frames = keys.filter(id=>evidence[id].video===video.id);
       return `<optgroup label="${e(video.title)}">${frames.map(id=>`<option value="${id}" ${id===key?'selected':''}>${e(evidence[id].title)} · ${e(evidence[id].kind)}</option>`).join('')}</optgroup>`;
     }).join('');
     return `<section class="panel comparison-monitor" aria-label="Frame ${side}">
-      <div class="panel-bar"><span>Monitor ${side}</span><span>${e(byId[item.video].title)}</span></div>
+      <div class="panel-bar"><span>Monitor ${side}</span><span>${e(sourceForEvidence(item).title)}</span></div>
       <div class="compare-picker"><label for="compare-${side}">Frame ${side}</label><select id="compare-${side}" data-compare-side="${side}" data-peer="${side==='A'?right:left}">${options}</select></div>
       <button type="button" class="exhibit-action" data-exhibit="${key}" aria-label="Enlarge monitor ${side} frame">${evidenceImage(item,'',true)}</button>
       <div class="panel-body"><h2>${e(item.title)}</h2>${evidenceCaption(item)}</div>
@@ -36,7 +36,7 @@ function comparisonView(leftKey,rightKey) {
     ).join('')}</div>
     <div class="compare-controls">
       <a class="button" href="${comparisonURL(right,left)}">Swap monitors</a>
-      <button class="button" type="button" data-compare-pin="${evidence[left].video}/${evidence[right].video}">Pin source records</button>
+      <button class="button" type="button" data-compare-pin="${evidenceRecordId(evidence[left])}/${evidenceRecordId(evidence[right])}">Pin source records</button>
       <a href="#board">Open case board</a>
       <span class="meta muted" id="compare-state" role="status"></span>
     </div>
